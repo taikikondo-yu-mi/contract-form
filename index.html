@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>契約登録フォーム</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+    }
+    h1 { color: #333; margin-bottom: 10px; font-size: 28px; text-align: center; }
+    .subtitle { color: #666; text-align: center; margin-bottom: 30px; font-size: 14px; }
+    .form-group { margin-bottom: 24px; }
+    label { display: block; color: #333; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+    .required { color: #e74c3c; margin-left: 4px; }
+    input[type="text"], select, input[type="file"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s;
+      background: white;
+    }
+    input[type="text"]:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+    #new-company-name { margin-top: 12px; }
+    .hidden { display: none; }
+    button {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    button:active { transform: translateY(0); }
+    button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+    .loading { text-align: center; color: #666; padding: 20px; }
+    .error {
+      background: #fee;
+      border: 2px solid #fcc;
+      padding: 12px;
+      border-radius: 8px;
+      color: #c33;
+      margin-bottom: 20px;
+    }
+    .success {
+      background: #efe;
+      border: 2px solid #cfc;
+      padding: 20px;
+      border-radius: 8px;
+      color: #363;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 契約登録フォーム</h1>
+    <p class="subtitle">HubSpot連携 - 契約情報を入力してください</p>
+    
+    <div id="loading" class="loading">読み込み中...</div>
+    <div id="error" class="error hidden"></div>
+    
+    <form id="contract-form" class="hidden">
+      <div class="form-group">
+        <label>会社名<span class="required">*</span></label>
+        <select id="company" name="company" required>
+          <option value="">選択してください</option>
+        </select>
+        <input type="text" id="new-company-name" name="new_company_name" placeholder="新しい会社名を入力" class="hidden" />
+      </div>
+      <div class="form-group">
+        <label>PM<span class="required">*</span></label>
+        <select id="pm" name="pm" required><option value="">選択してください</option></select>
+      </div>
+      <div class="form-group">
+        <label>ディレクター<span class="required">*</span></label>
+        <select id="director" name="director" required><option value="">選択してください</option></select>
+      </div>
+      <div class="form-group">
+        <label>アシスタント<span class="required">*</span></label>
+        <select id="assistant" name="assistant" required><option value="">選択してください</option></select>
+      </div>
+      <div class="form-group">
+        <label>契約書 (PDF)<span class="required">*</span></label>
+        <input type="file" id="contract-file" name="contract_file" accept=".pdf" required />
+      </div>
+      <button type="submit">登録する</button>
+    </form>
+    <div id="success" class="success hidden">✅ 契約登録が完了しました!</div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://kumamon-n8n.xvps.jp/webhook';
+    
+    async function loadFormData() {
+      try {
+        const response = await fetch(`${API_BASE}/get-form-data`);
+        const data = await response.json();
+        if (!data.success) throw new Error('データ取得に失敗しました');
+        
+        const userOpts = data.users.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
+        ['pm','director','assistant'].forEach(id => document.getElementById(id).innerHTML += userOpts);
+        
+        const companyOpts = data.companies.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
+        document.getElementById('company').innerHTML += companyOpts;
+        
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('contract-form').classList.remove('hidden');
+      } catch (error) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('error').textContent = error.message;
+        document.getElementById('error').classList.remove('hidden');
+      }
+    }
+    
+    document.getElementById('company').addEventListener('change', function() {
+      const input = document.getElementById('new-company-name');
+      if (this.value === '_new_') {
+        input.classList.remove('hidden');
+        input.required = true;
+      } else {
+        input.classList.add('hidden');
+        input.required = false;
+        input.value = '';
+      }
+    });
+    
+    document.getElementById('contract-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = this.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '登録中...';
+      
+      try {
+        const formData = new FormData(this);
+        const file = document.getElementById('contract-file').files[0];
+        const fileBase64 = await new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.readAsDataURL(file);
+        });
+        
+        const payload = {
+          company_id: formData.get('company'),
+          company_name: formData.get('new_company_name') || null,
+          pm: formData.get('pm'),
+          director: formData.get('director'),
+          assistant: formData.get('assistant'),
+          contract_file: { name: file.name, data: fileBase64 }
+        };
+        
+        const response = await fetch(`${API_BASE}/submit-contract`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error || '登録に失敗しました');
+        
+        this.classList.add('hidden');
+        document.getElementById('success').classList.remove('hidden');
+      } catch (error) {
+        alert('エラー: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = '登録する';
+      }
+    });
+    
+    loadFormData();
+  </script>
+</body>
+</html>
