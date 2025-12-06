@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>契約登録フォーム</title>
+  
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -28,6 +32,7 @@
     .form-group { margin-bottom: 24px; }
     label { display: block; color: #333; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
     .required { color: #e74c3c; margin-left: 4px; }
+    
     input[type="text"], select, input[type="file"] {
       width: 100%;
       padding: 12px 16px;
@@ -42,16 +47,43 @@
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
-    select {
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 16px center;
-      padding-right: 40px;
+    
+    /* Select2のカスタマイズ */
+    .select2-container--default .select2-selection--single {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      height: 48px;
+      padding: 8px 16px;
     }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 30px;
+      color: #333;
+      font-size: 15px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 46px;
+      right: 10px;
+    }
+    .select2-container--default.select2-container--open .select2-selection--single {
+      border-color: #667eea;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+      background-color: #667eea;
+    }
+    .select2-dropdown {
+      border: 2px solid #667eea;
+      border-radius: 8px;
+    }
+    
     #new-company-name { margin-top: 12px; }
     .hidden { display: none; }
+    
     button {
       width: 100%;
       padding: 16px;
@@ -71,6 +103,7 @@
     }
     button:active { transform: translateY(0); }
     button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+    
     .loading { text-align: center; color: #666; padding: 20px; }
     .error {
       background: #fee;
@@ -106,26 +139,43 @@
         </select>
         <input type="text" id="new-company-name" name="new_company_name" placeholder="新しい会社名を入力" class="hidden" />
       </div>
+      
       <div class="form-group">
         <label>PM<span class="required">*</span></label>
-        <select id="pm" name="pm" required><option value="">選択してください</option></select>
+        <select id="pm" name="pm" required>
+          <option value="">選択してください</option>
+        </select>
       </div>
+      
       <div class="form-group">
         <label>ディレクター<span class="required">*</span></label>
-        <select id="director" name="director" required><option value="">選択してください</option></select>
+        <select id="director" name="director" required>
+          <option value="">選択してください</option>
+        </select>
       </div>
+      
       <div class="form-group">
         <label>アシスタント<span class="required">*</span></label>
-        <select id="assistant" name="assistant" required><option value="">選択してください</option></select>
+        <select id="assistant" name="assistant" required>
+          <option value="">選択してください</option>
+        </select>
       </div>
+      
       <div class="form-group">
         <label>契約書 (PDF)<span class="required">*</span></label>
         <input type="file" id="contract-file" name="contract_file" accept=".pdf" required />
       </div>
+      
       <button type="submit">登録する</button>
     </form>
+    
     <div id="success" class="success hidden">✅ 契約登録が完了しました!</div>
   </div>
+
+  <!-- jQuery (Select2の依存) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Select2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
   <script>
     const API_BASE = 'https://kumamon-n8n.xvps.jp/webhook';
@@ -136,14 +186,40 @@
         const data = await response.json();
         if (!data.success) throw new Error('データ取得に失敗しました');
         
+        // Users (PM, Director, Assistant)
         const userOpts = data.users.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
-        ['pm','director','assistant'].forEach(id => document.getElementById(id).innerHTML += userOpts);
+        ['pm','director','assistant'].forEach(id => {
+          document.getElementById(id).innerHTML += userOpts;
+        });
         
+        // Companies
         const companyOpts = data.companies.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
         document.getElementById('company').innerHTML += companyOpts;
         
+        // Select2の初期化 (検索機能付きドロップダウン)
+        $('#company').select2({
+          placeholder: '会社名を検索または選択',
+          allowClear: true,
+          width: '100%',
+          language: {
+            noResults: function() { return "該当する会社が見つかりません"; },
+            searching: function() { return "検索中..."; }
+          }
+        });
+        
+        $('#pm, #director, #assistant').select2({
+          placeholder: '担当者を検索または選択',
+          allowClear: true,
+          width: '100%',
+          language: {
+            noResults: function() { return "該当する担当者が見つかりません"; },
+            searching: function() { return "検索中..."; }
+          }
+        });
+        
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('contract-form').classList.remove('hidden');
+        
       } catch (error) {
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('error').textContent = error.message;
@@ -151,20 +227,23 @@
       }
     }
     
-    document.getElementById('company').addEventListener('change', function() {
-      const input = document.getElementById('new-company-name');
+    // 会社選択時の処理
+    $('#company').on('change', function() {
+      const newCompanyInput = document.getElementById('new-company-name');
       if (this.value === '_new_') {
-        input.classList.remove('hidden');
-        input.required = true;
+        newCompanyInput.classList.remove('hidden');
+        newCompanyInput.required = true;
       } else {
-        input.classList.add('hidden');
-        input.required = false;
-        input.value = '';
+        newCompanyInput.classList.add('hidden');
+        newCompanyInput.required = false;
+        newCompanyInput.value = '';
       }
     });
     
+    // フォーム送信
     document.getElementById('contract-form').addEventListener('submit', async function(e) {
       e.preventDefault();
+      
       const btn = this.querySelector('button[type="submit"]');
       btn.disabled = true;
       btn.textContent = '登録中...';
@@ -172,6 +251,7 @@
       try {
         const formData = new FormData(this);
         const file = document.getElementById('contract-file').files[0];
+        
         const fileBase64 = await new Promise(resolve => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result.split(',')[1]);
@@ -179,11 +259,11 @@
         });
         
         const payload = {
-          company_id: formData.get('company'),
+          company_id: formData.get('company') || $('#company').val(),
           company_name: formData.get('new_company_name') || null,
-          pm: formData.get('pm'),
-          director: formData.get('director'),
-          assistant: formData.get('assistant'),
+          pm: formData.get('pm') || $('#pm').val(),
+          director: formData.get('director') || $('#director').val(),
+          assistant: formData.get('assistant') || $('#assistant').val(),
           contract_file: { name: file.name, data: fileBase64 }
         };
         
@@ -198,6 +278,7 @@
         
         this.classList.add('hidden');
         document.getElementById('success').classList.remove('hidden');
+        
       } catch (error) {
         alert('エラー: ' + error.message);
         btn.disabled = false;
@@ -205,6 +286,7 @@
       }
     });
     
+    // 初期化
     loadFormData();
   </script>
 </body>
