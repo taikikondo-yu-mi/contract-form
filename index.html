@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>契約登録フォーム - Phase 2</title>
+  <title>契約登録フォーム - 完成版</title>
   
   <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -30,19 +30,21 @@
     h1 { color: #333; margin-bottom: 10px; font-size: 28px; text-align: center; }
     .subtitle { color: #666; text-align: center; margin-bottom: 30px; font-size: 14px; }
     .phase-badge {
-      background: #667eea;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 4px 12px;
+      padding: 6px 16px;
       border-radius: 12px;
       font-size: 12px;
+      font-weight: 600;
       display: inline-block;
       margin-bottom: 20px;
     }
     .form-group { margin-bottom: 24px; }
     label { display: block; color: #333; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
     .required { color: #e74c3c; margin-left: 4px; }
+    .optional { color: #999; font-weight: 400; margin-left: 4px; font-size: 12px; }
     
-    input[type="text"], select {
+    input[type="text"], select, input[type="file"] {
       width: 100%;
       padding: 12px 16px;
       border: 2px solid #e0e0e0;
@@ -86,9 +88,13 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
-    button:hover { transform: translateY(-2px); }
-    button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+    button:hover { 
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    button:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
     
     .loading { text-align: center; color: #666; padding: 20px; }
     .error {
@@ -107,15 +113,24 @@
       color: #363;
       text-align: center;
     }
+    .success-details {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #555;
+      background: white;
+      padding: 12px;
+      border-radius: 6px;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div style="text-align: center;">
-      <span class="phase-badge">✨ Phase 2: 担当者情報追加</span>
+      <span class="phase-badge">🎉 完成版</span>
     </div>
     <h1>📝 契約登録フォーム</h1>
-    <p class="subtitle">HubSpot連携 - 会社選択 + 担当者設定</p>
+    <p class="subtitle">HubSpot連携 - 会社 + 担当者 + Deal + 契約書</p>
     
     <div id="loading" class="loading">読み込み中...</div>
     <div id="error" class="error hidden"></div>
@@ -156,12 +171,22 @@
         </select>
       </div>
       
+      <div class="form-group">
+        <label>契約書 (PDF)<span class="optional">(任意)</span></label>
+        <input 
+          type="file" 
+          id="contract-file" 
+          name="contract_file" 
+          accept=".pdf"
+        />
+      </div>
+      
       <button type="submit">登録する</button>
     </form>
     
     <div id="success" class="success hidden">
-      ✅ 登録が完了しました!<br>
-      <small id="result-details"></small>
+      ✅ 契約登録が完了しました!<br>
+      <div id="result-details" class="success-details"></div>
     </div>
   </div>
 
@@ -249,13 +274,31 @@
       
       try {
         const formData = new FormData(this);
+        const file = document.getElementById('contract-file').files[0];
+        
+        // ファイルが選択されている場合のみBase64に変換
+        let fileBase64 = null;
+        let fileName = null;
+        
+        if (file) {
+          fileBase64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.readAsDataURL(file);
+          });
+          fileName = file.name;
+        }
         
         const payload = {
           company_id: formData.get('company') || $('#company').val(),
           company_name: formData.get('new_company_name') || null,
           pm: formData.get('pm') || $('#pm').val(),
           director: formData.get('director') || $('#director').val(),
-          assistant: formData.get('assistant') || $('#assistant').val()
+          assistant: formData.get('assistant') || $('#assistant').val(),
+          contract_file: file ? {
+            name: fileName,
+            data: fileBase64
+          } : null
         };
         
         const response = await fetch(`${API_BASE}/submit-contract-v2`, {
@@ -270,8 +313,11 @@
         
         form.classList.add('hidden');
         successDiv.classList.remove('hidden');
-        document.getElementById('result-details').textContent = 
-          `Company ID: ${result.company_id}`;
+        document.getElementById('result-details').innerHTML = `
+          <strong>✓ Company ID:</strong> ${result.company_id}<br>
+          <strong>✓ Deal ID:</strong> ${result.deal_id}<br>
+          <strong>✓ File:</strong> ${result.file_name}
+        `;
         
       } catch (error) {
         errorDiv.textContent = 'エラー: ' + error.message;
