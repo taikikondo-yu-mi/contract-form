@@ -3,11 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>契約登録フォーム</title>
-  
-  <!-- Select2 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-  
+  <title>契約登録フォーム - Phase 1</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -29,61 +25,31 @@
     }
     h1 { color: #333; margin-bottom: 10px; font-size: 28px; text-align: center; }
     .subtitle { color: #666; text-align: center; margin-bottom: 30px; font-size: 14px; }
+    .phase-badge {
+      background: #f0f0f0;
+      color: #666;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
     .form-group { margin-bottom: 24px; }
     label { display: block; color: #333; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
     .required { color: #e74c3c; margin-left: 4px; }
-    
-    input[type="text"], select, input[type="file"] {
+    input[type="text"] {
       width: 100%;
       padding: 12px 16px;
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       font-size: 15px;
       transition: all 0.3s;
-      background: white;
     }
-    input[type="text"]:focus, select:focus {
+    input[type="text"]:focus {
       outline: none;
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
-    
-    /* Select2のカスタマイズ */
-    .select2-container--default .select2-selection--single {
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      height: 48px;
-      padding: 8px 16px;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-      line-height: 30px;
-      color: #333;
-      font-size: 15px;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-      height: 46px;
-      right: 10px;
-    }
-    .select2-container--default.select2-container--open .select2-selection--single {
-      border-color: #667eea;
-    }
-    .select2-container--default .select2-search--dropdown .select2-search__field {
-      border: 2px solid #e0e0e0;
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 14px;
-    }
-    .select2-container--default .select2-results__option--highlighted[aria-selected] {
-      background-color: #667eea;
-    }
-    .select2-dropdown {
-      border: 2px solid #667eea;
-      border-radius: 8px;
-    }
-    
-    #new-company-name { margin-top: 12px; }
-    .hidden { display: none; }
-    
     button {
       width: 100%;
       padding: 16px;
@@ -95,16 +61,9 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    }
-    button:active { transform: translateY(0); }
+    button:hover { transform: translateY(-2px); }
     button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
-    
-    .loading { text-align: center; color: #666; padding: 20px; }
     .error {
       background: #fee;
       border: 2px solid #fcc;
@@ -121,173 +80,87 @@
       color: #363;
       text-align: center;
     }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <div class="container">
+    <div style="text-align: center;">
+      <span class="phase-badge">🧪 Phase 1: テスト版</span>
+    </div>
     <h1>📝 契約登録フォーム</h1>
-    <p class="subtitle">HubSpot連携 - 契約情報を入力してください</p>
+    <p class="subtitle">HubSpot連携 - 会社名のみテスト</p>
     
-    <div id="loading" class="loading">読み込み中...</div>
     <div id="error" class="error hidden"></div>
     
-    <form id="contract-form" class="hidden">
+    <form id="contract-form">
       <div class="form-group">
         <label>会社名<span class="required">*</span></label>
-        <select id="company" name="company" required>
-          <option value="">選択してください</option>
-        </select>
-        <input type="text" id="new-company-name" name="new_company_name" placeholder="新しい会社名を入力" class="hidden" />
-      </div>
-      
-      <div class="form-group">
-        <label>PM<span class="required">*</span></label>
-        <select id="pm" name="pm" required>
-          <option value="">選択してください</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label>ディレクター<span class="required">*</span></label>
-        <select id="director" name="director" required>
-          <option value="">選択してください</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label>アシスタント<span class="required">*</span></label>
-        <select id="assistant" name="assistant" required>
-          <option value="">選択してください</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label>契約書 (PDF)<span class="required">*</span></label>
-        <input type="file" id="contract-file" name="contract_file" accept=".pdf" required />
+        <input 
+          type="text" 
+          id="company-name" 
+          name="company_name" 
+          placeholder="例: 株式会社テスト"
+          required
+        />
       </div>
       
       <button type="submit">登録する</button>
     </form>
     
-    <div id="success" class="success hidden">✅ 契約登録が完了しました!</div>
+    <div id="success" class="success hidden">
+      ✅ 会社登録が完了しました!<br>
+      <small id="result-details"></small>
+    </div>
   </div>
 
-  <!-- jQuery (Select2の依存) -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <!-- Select2 JS -->
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
   <script>
-    const API_BASE = 'https://kumamon-n8n.xvps.jp/webhook';
+    const API_URL = 'https://kumamon-n8n.xvps.jp/webhook/submit-contract-v2';
     
-    async function loadFormData() {
-      try {
-        const response = await fetch(`${API_BASE}/get-form-data`);
-        const data = await response.json();
-        if (!data.success) throw new Error('データ取得に失敗しました');
-        
-        // Users (PM, Director, Assistant)
-        const userOpts = data.users.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
-        ['pm','director','assistant'].forEach(id => {
-          document.getElementById(id).innerHTML += userOpts;
-        });
-        
-        // Companies
-        const companyOpts = data.companies.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
-        document.getElementById('company').innerHTML += companyOpts;
-        
-        // Select2の初期化 (検索機能付きドロップダウン)
-        $('#company').select2({
-          placeholder: '会社名を検索または選択',
-          allowClear: true,
-          width: '100%',
-          language: {
-            noResults: function() { return "該当する会社が見つかりません"; },
-            searching: function() { return "検索中..."; }
-          }
-        });
-        
-        $('#pm, #director, #assistant').select2({
-          placeholder: '担当者を検索または選択',
-          allowClear: true,
-          width: '100%',
-          language: {
-            noResults: function() { return "該当する担当者が見つかりません"; },
-            searching: function() { return "検索中..."; }
-          }
-        });
-        
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('contract-form').classList.remove('hidden');
-        
-      } catch (error) {
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('error').textContent = error.message;
-        document.getElementById('error').classList.remove('hidden');
-      }
-    }
-    
-    // 会社選択時の処理
-    $('#company').on('change', function() {
-      const newCompanyInput = document.getElementById('new-company-name');
-      if (this.value === '_new_') {
-        newCompanyInput.classList.remove('hidden');
-        newCompanyInput.required = true;
-      } else {
-        newCompanyInput.classList.add('hidden');
-        newCompanyInput.required = false;
-        newCompanyInput.value = '';
-      }
-    });
-    
-    // フォーム送信
     document.getElementById('contract-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       const btn = this.querySelector('button[type="submit"]');
+      const errorDiv = document.getElementById('error');
+      const successDiv = document.getElementById('success');
+      const form = document.getElementById('contract-form');
+      
+      // リセット
+      errorDiv.classList.add('hidden');
+      successDiv.classList.add('hidden');
       btn.disabled = true;
       btn.textContent = '登録中...';
       
       try {
-        const formData = new FormData(this);
-        const file = document.getElementById('contract-file').files[0];
+        const companyName = document.getElementById('company-name').value;
         
-        const fileBase64 = await new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.readAsDataURL(file);
-        });
-        
-        const payload = {
-          company_id: formData.get('company') || $('#company').val(),
-          company_name: formData.get('new_company_name') || null,
-          pm: formData.get('pm') || $('#pm').val(),
-          director: formData.get('director') || $('#director').val(),
-          assistant: formData.get('assistant') || $('#assistant').val(),
-          contract_file: { name: file.name, data: fileBase64 }
-        };
-        
-        const response = await fetch(`${API_BASE}/submit-contract`, {
+        const response = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({
+            company_name: companyName
+          })
         });
         
         const result = await response.json();
-        if (!result.success) throw new Error(result.error || '登録に失敗しました');
         
-        this.classList.add('hidden');
-        document.getElementById('success').classList.remove('hidden');
+        if (!result.success) {
+          throw new Error(result.error || '登録に失敗しました');
+        }
+        
+        // 成功表示
+        form.classList.add('hidden');
+        successDiv.classList.remove('hidden');
+        document.getElementById('result-details').textContent = 
+          `Company ID: ${result.company_id}`;
         
       } catch (error) {
-        alert('エラー: ' + error.message);
+        errorDiv.textContent = 'エラー: ' + error.message;
+        errorDiv.classList.remove('hidden');
         btn.disabled = false;
         btn.textContent = '登録する';
       }
     });
-    
-    // 初期化
-    loadFormData();
   </script>
 </body>
 </html>
