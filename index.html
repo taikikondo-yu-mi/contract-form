@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+Copy<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>契約登録フォーム - Phase 1.5</title>
+  <title>契約登録フォーム - Phase 2</title>
   
   <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -30,8 +30,8 @@
     h1 { color: #333; margin-bottom: 10px; font-size: 28px; text-align: center; }
     .subtitle { color: #666; text-align: center; margin-bottom: 30px; font-size: 14px; }
     .phase-badge {
-      background: #f0f0f0;
-      color: #666;
+      background: #667eea;
+      color: white;
       padding: 4px 12px;
       border-radius: 12px;
       font-size: 12px;
@@ -66,6 +66,10 @@
     .select2-container--default .select2-selection--single .select2-selection__rendered {
       line-height: 30px;
       font-size: 15px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 46px;
+      right: 10px;
     }
     
     #new-company-name { margin-top: 12px; }
@@ -108,10 +112,10 @@
 <body>
   <div class="container">
     <div style="text-align: center;">
-      <span class="phase-badge">🧪 Phase 1.5: 会社選択テスト</span>
+      <span class="phase-badge">✨ Phase 2: 担当者情報追加</span>
     </div>
     <h1>📝 契約登録フォーム</h1>
-    <p class="subtitle">HubSpot連携 - 会社選択または新規作成</p>
+    <p class="subtitle">HubSpot連携 - 会社選択 + 担当者設定</p>
     
     <div id="loading" class="loading">読み込み中...</div>
     <div id="error" class="error hidden"></div>
@@ -131,6 +135,27 @@
         />
       </div>
       
+      <div class="form-group">
+        <label>PM (プロジェクトマネージャー)<span class="required">*</span></label>
+        <select id="pm" name="pm" required>
+          <option value="">選択してください</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>ディレクター<span class="required">*</span></label>
+        <select id="director" name="director" required>
+          <option value="">選択してください</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>アシスタント<span class="required">*</span></label>
+        <select id="assistant" name="assistant" required>
+          <option value="">選択してください</option>
+        </select>
+      </div>
+      
       <button type="submit">登録する</button>
     </form>
     
@@ -148,15 +173,24 @@
   <script>
     const API_BASE = 'https://kumamon-n8n.xvps.jp/webhook';
     
-    // 会社リスト取得
-    async function loadCompanies() {
+    // データ取得
+    async function loadFormData() {
       try {
         const response = await fetch(`${API_BASE}/get-form-data`);
         const data = await response.json();
         
         if (!data.success) throw new Error('データ取得に失敗');
         
-        // 会社リストを追加
+        // ユーザーリスト追加
+        const userOptions = data.users.map(u => 
+          `<option value="${u.value}">${u.label}</option>`
+        ).join('');
+        
+        ['pm', 'director', 'assistant'].forEach(id => {
+          document.getElementById(id).innerHTML += userOptions;
+        });
+        
+        // 会社リスト追加
         const companyOptions = data.companies.map(c => 
           `<option value="${c.value}">${c.label}</option>`
         ).join('');
@@ -166,6 +200,12 @@
         // Select2初期化
         $('#company').select2({
           placeholder: '会社名を検索または選択',
+          allowClear: true,
+          width: '100%'
+        });
+        
+        $('#pm, #director, #assistant').select2({
+          placeholder: '担当者を検索または選択',
           allowClear: true,
           width: '100%'
         });
@@ -209,12 +249,13 @@
       
       try {
         const formData = new FormData(this);
-        const companyId = formData.get('company') || $('#company').val();
-        const companyName = formData.get('new_company_name');
         
         const payload = {
-          company_id: companyId,
-          company_name: companyName || null
+          company_id: formData.get('company') || $('#company').val(),
+          company_name: formData.get('new_company_name') || null,
+          pm: formData.get('pm') || $('#pm').val(),
+          director: formData.get('director') || $('#director').val(),
+          assistant: formData.get('assistant') || $('#assistant').val()
         };
         
         const response = await fetch(`${API_BASE}/submit-contract-v2`, {
@@ -241,7 +282,7 @@
     });
     
     // 初期化
-    loadCompanies();
+    loadFormData();
   </script>
 </body>
 </html>
