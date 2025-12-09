@@ -169,21 +169,6 @@
                         html += `<p class="result-item">✓ <strong>Deal ID:</strong> ${response.deal_id || 'undefined'}</p>`;
                         html += `<p class="result-item">✓ <strong>File:</strong> ${response.file_id || 'undefined'}</p>`;
                         
-                        // 🔍 デバッグ情報を表示
-                        if (response.file_debug) {
-                            html += '<div class="debug-info">';
-                            html += '<strong>🔍 ファイルアップロードデバッグ情報:</strong><br>';
-                            html += '<pre>' + JSON.stringify(response.file_debug, null, 2) + '</pre>';
-                            html += '</div>';
-                        }
-                        
-                        if (response.file_error) {
-                            html += '<div class="debug-info" style="background: #f8d7da; border-color: #f5c6cb;">';
-                            html += '<strong>❌ ファイルエラー詳細:</strong><br>';
-                            html += '<pre>' + JSON.stringify(response.file_error, null, 2) + '</pre>';
-                            html += '</div>';
-                        }
-                        
                         html += '</div>';
                         $('#result').html(html);
                     },
