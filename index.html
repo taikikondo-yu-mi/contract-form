@@ -181,7 +181,7 @@
             min-width: 120px;
         }
         
-        /* Select2 カスタムスタイル */
+        /* Select2 シンプルスタイル - ×ボタンなし */
         .select2-container { 
             width: 100% !important; 
         }
@@ -194,13 +194,10 @@
             transition: all 0.2s;
         }
         
-        .select2-container--default .select2-selection--single:hover {
-            border-color: #cbd5e0 !important;
-        }
-        
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             line-height: 48px !important;
             padding-left: 16px !important;
+            padding-right: 40px !important;
             color: #2d3748;
             font-size: 15px;
         }
@@ -211,17 +208,21 @@
         
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 48px !important;
-            right: 10px !important;
+            right: 12px !important;
+            width: 20px !important;
         }
         
         .select2-container--default .select2-selection--single .select2-selection__arrow b {
             border-color: #a0aec0 transparent transparent transparent !important;
             border-width: 6px 5px 0 5px !important;
+            margin-left: -5px !important;
+            margin-top: -3px !important;
         }
         
         .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
             border-color: transparent transparent #a0aec0 transparent !important;
             border-width: 0 5px 6px 5px !important;
+            margin-top: -9px !important;
         }
         
         .select2-container--default.select2-container--focus .select2-selection--single,
@@ -231,17 +232,9 @@
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
         
-        /* クリアボタン(×)のスタイル */
-        .select2-container--default .select2-selection--single .select2-selection__clear {
-            color: #a0aec0 !important;
-            font-size: 20px !important;
-            font-weight: 300 !important;
-            margin-right: 10px !important;
-            transition: color 0.2s;
-        }
-        
-        .select2-container--default .select2-selection--single .select2-selection__clear:hover {
-            color: #718096 !important;
+        /* ×ボタンを完全に非表示 */
+        .select2-selection__clear {
+            display: none !important;
         }
         
         /* ドロップダウンのスタイル */
@@ -252,10 +245,14 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
         
+        .select2-search--dropdown {
+            padding: 12px;
+        }
+        
         .select2-search--dropdown .select2-search__field {
             border: 2px solid #e2e8f0 !important;
             border-radius: 8px !important;
-            padding: 10px !important;
+            padding: 10px 12px !important;
             font-size: 14px;
         }
         
@@ -380,10 +377,10 @@
                     $('#company').html('<option value="">選択してください</option>' + companyOptions);
                 }
 
-                // Select2初期化
+                // Select2初期化 (×ボタンなし)
                 $('#company, #pm, #director, #assistant').select2({
                     placeholder: '検索または選択',
-                    allowClear: true,
+                    allowClear: false,  // ← ×ボタンを完全に無効化
                     language: { 
                         noResults: () => '該当なし',
                         searching: () => '検索中...'
