@@ -341,7 +341,7 @@
 
             <div class="form-group">
                 <label for="assistant">アシスタント<span class="required">*</span></label>
-                <select id="assistant" name="assistant" required>
+                <select id="assistant" name="assistant">
                     <option value="">読み込み中...</option>
                 </select>
             </div>
@@ -380,7 +380,7 @@
                 // Select2初期化 (×ボタンなし)
                 $('#company, #pm, #director, #assistant').select2({
                     placeholder: '検索または選択',
-                    allowClear: false,  // ← ×ボタンを完全に無効化
+                    allowClear: true,  // ← ×ボタンを完全に無効化
                     language: { 
                         noResults: () => '該当なし',
                         searching: () => '検索中...'
