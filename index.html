@@ -181,7 +181,6 @@
             min-width: 120px;
         }
         
-        /* Select2 シンプルスタイル - ×ボタンなし */
         .select2-container { 
             width: 100% !important; 
         }
@@ -232,12 +231,10 @@
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
         
-        /* ×ボタンを完全に非表示 */
         .select2-selection__clear {
             display: none !important;
         }
         
-        /* ドロップダウンのスタイル */
         .select2-dropdown {
             border: 2px solid #e2e8f0 !important;
             border-radius: 10px !important;
@@ -340,7 +337,7 @@
             </div>
 
             <div class="form-group">
-                <label for="assistant">アシスタント</label>
+                <label for="assistant">アシスタント<span class="optional">(任意)</span></label>
                 <select id="assistant" name="assistant">
                     <option value="">読み込み中...</option>
                 </select>
@@ -377,15 +374,17 @@
                     $('#company').html('<option value="">選択してください</option>' + companyOptions);
                 }
 
-                // Select2初期化 (×ボタンなし)
+                // Select2初期化
                 $('#company, #pm, #director, #assistant').select2({
                     placeholder: '検索または選択',
-                    allowClear: true,  // ← ×ボタンを完全に無効化
+                    allowClear: true,
                     language: { 
                         noResults: () => '該当なし',
                         searching: () => '検索中...'
                     }
                 });
+            }).fail(function() {
+                alert('データの読み込みに失敗しました。ページを再読み込みしてください。');
             });
 
             // 新規会社選択時の表示切替
@@ -414,8 +413,11 @@
                     company_id: companyId,
                     company_name: companyName,
                     pm: $('#pm').val(),
+                    pm_name: $('#pm option:selected').text() || '',
                     director: $('#director').val(),
-                    assistant: $('#assistant').val()
+                    director_name: $('#director option:selected').text() || '',
+                    assistant: $('#assistant').val() || '',
+                    assistant_name: $('#assistant option:selected').text() || ''
                 };
 
                 if (fileInput.files.length > 0) {
