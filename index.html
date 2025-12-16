@@ -416,6 +416,11 @@
                     pm: $('#pm').val(),
                     director: $('#director').val(),
                     assistant: $('#assistant').val()
+                    pm_name: $('#pm option:selected').text(),  // ← 追加
+                    director: $('#director').val(),
+                    director_name: $('#director option:selected').text(),  // ← 追加
+                    assistant: $('#assistant').val(),
+                    assistant_name: $('#assistant option:selected').text() || '未設定'  // ← 追加
                 };
 
                 if (fileInput.files.length > 0) {
