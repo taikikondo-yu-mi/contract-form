@@ -450,10 +450,10 @@
                         html += `<p class="result-item"><strong>Company ID:</strong> ${response.company_id || 'N/A'}</p>`;
                         html += `<p class="result-item"><strong>Deal ID:</strong> ${response.deal_id || 'N/A'}</p>`;
                         if (response.file_url) {
-    html += `<p class="result-item"><strong>契約書:</strong> <a href="${response.file_url}" target="_blank" style="color: #1976d2; text-decoration: underline;">${response.file_name || 'ファイルを開く'}</a></p>`;
-} else {
-    html += `<p class="result-item"><strong>契約書:</strong> 未添付</p>`;
-}
+    　　　　　　　　　　　　html += `<p class="result-item"><strong>契約書:</strong> <a href="${response.file_url}" target="_blank" style="color: #1976d2; text-decoration: underline;">${response.file_url}</a></p>`;
+　　　　　　　　　　　　　　　} else {
+    　　　　　　　　　　　　html += `<p class="result-item"><strong>契約書:</strong> 未添付</p>`;
+　　　　　　　　　　　　　　　}
                         html += '</div>';
                         $('#result').html(html);
                     },
