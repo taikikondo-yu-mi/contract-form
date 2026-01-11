@@ -365,113 +365,116 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        const API_BASE = 'https://kumamon-n8n.xvps.jp/webhook';
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    const API_BASE = 'https://kumamon-n8n.xvps.jp/webhook';
 
-        $(document).ready(function() {
-            // データ取得
-            $.get(`${API_BASE}/get-form-data`, function(data) {
-                if (data.users) {
-                    const userOptions = data.users.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
-                    $('#pm, #director, #assistant').html('<option value="">選択してください</option>' + userOptions);
-                }
-                if (data.companies) {
-                    const companyOptions = data.companies.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
-                    $('#company').html('<option value="">選択してください</option>' + companyOptions);
-                }
+    $(document).ready(function() {
+        // データ取得
+        $.get(`${API_BASE}/get-form-data`, function(data) {
+            if (data.users) {
+                const userOptions = data.users.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
+                // ★ deal_owner も追加
+                $('#deal_owner, #pm, #director, #assistant').html('<option value="">選択してください</option>' + userOptions);
+            }
+            if (data.companies) {
+                const companyOptions = data.companies.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
+                $('#company').html('<option value="">選択してください</option>' + companyOptions);
+            }
 
-                // Select2初期化
-                $('#company, #pm, #director, #assistant').select2({
-                    placeholder: '検索または選択',
-                    allowClear: true,
-                    language: { 
-                        noResults: () => '該当なし',
-                        searching: () => '検索中...'
-                    }
-                });
-            }).fail(function() {
-                alert('データの読み込みに失敗しました。ページを再読み込みしてください。');
-            });
-
-            // 新規会社選択時の表示切替
-            $('#company').on('change', function() {
-                if ($(this).val() === '_new_') {
-                    $('#newCompanyGroup').removeClass('hidden');
-                    $('#companyName').prop('required', true);
-                } else {
-                    $('#newCompanyGroup').addClass('hidden');
-                    $('#companyName').prop('required', false);
+            // Select2初期化（★ deal_owner も追加）
+            $('#company, #deal_owner, #pm, #director, #assistant').select2({
+                placeholder: '検索または選択',
+                allowClear: true,
+                language: { 
+                    noResults: () => '該当なし',
+                    searching: () => '検索中...'
                 }
             });
+        }).fail(function() {
+            alert('データの読み込みに失敗しました。ページを再読み込みしてください。');
+        });
 
-            // フォーム送信
-            $('#contractForm').on('submit', function(e) {
-                e.preventDefault();
-                $('#submitBtn').prop('disabled', true).text('送信中...');
-                $('#loading').removeClass('hidden');
-                $('#result').html('');
-
-                const companyId = $('#company').val();
-                const companyName = companyId === '_new_' ? $('#companyName').val() : $('#company option:selected').text();
-                const fileInput = $('#contractFile')[0];
-
-                const payload = {
-                    company_id: companyId,
-                    company_name: companyName,
-                    pm: $('#pm').val(),
-                    pm_name: $('#pm option:selected').text() || '',
-                    director: $('#director').val(),
-                    director_name: $('#director option:selected').text() || '',
-                    assistant: $('#assistant').val() || '',
-                    assistant_name: $('#assistant option:selected').text() || ''
-                };
-
-                if (fileInput.files.length > 0) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        payload.contract_file = {
-                            name: fileInput.files[0].name,
-                            data: event.target.result.split(',')[1]
-                        };
-                        sendData(payload);
-                    };
-                    reader.readAsDataURL(fileInput.files[0]);
-                } else {
-                    sendData(payload);
-                }
-            });
-
-            function sendData(payload) {
-                $.ajax({
-                    url: `${API_BASE}/submit-contract-v2`,
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(payload),
-                    success: function(response) {
-                        $('#loading').addClass('hidden');
-                        $('#submitBtn').prop('disabled', false).text('登録する');
-
-                        let html = '<div class="success">';
-                        html += '<h3>✅ 契約登録が完了しました!</h3>';
-                        html += `<p class="result-item"><strong>Company ID:</strong> ${response.company_id || 'N/A'}</p>`;
-                        html += `<p class="result-item"><strong>Deal ID:</strong> ${response.deal_id || 'N/A'}</p>`;
-                        if (response.file_url) {
-    　　　　　　　　　　　　html += `<p class="result-item"><strong>契約書:</strong> <a href="${response.file_url}" target="_blank" style="color: #1976d2; text-decoration: underline;">${response.file_url}</a></p>`;
-　　　　　　　　　　　　　　　} else {
-    　　　　　　　　　　　　html += `<p class="result-item"><strong>契約書:</strong> 未添付</p>`;
-　　　　　　　　　　　　　　　}
-                        html += '</div>';
-                        $('#result').html(html);
-                    },
-                    error: function(xhr) {
-                        $('#loading').addClass('hidden');
-                        $('#submitBtn').prop('disabled', false).text('登録する');
-                        $('#result').html(`<div class="error"><strong>エラー:</strong> ${xhr.responseText || 'Failed to fetch'}</div>`);
-                    }
-                });
+        // 新規会社選択時の表示切替
+        $('#company').on('change', function() {
+            if ($(this).val() === '_new_') {
+                $('#newCompanyGroup').removeClass('hidden');
+                $('#companyName').prop('required', true);
+            } else {
+                $('#newCompanyGroup').addClass('hidden');
+                $('#companyName').prop('required', false);
             }
         });
-    </script>
+
+        // フォーム送信
+        $('#contractForm').on('submit', function(e) {
+            e.preventDefault();
+            $('#submitBtn').prop('disabled', true).text('送信中...');
+            $('#loading').removeClass('hidden');
+            $('#result').html('');
+
+            const companyId = $('#company').val();
+            const companyName = companyId === '_new_' ? $('#companyName').val() : $('#company option:selected').text();
+            const fileInput = $('#contractFile')[0];
+
+            const payload = {
+                company_id: companyId,
+                company_name: companyName,
+                deal_owner: $('#deal_owner').val(),  // ★ 追加
+                deal_owner_name: $('#deal_owner option:selected').text() || '',  // ★ 追加
+                pm: $('#pm').val(),
+                pm_name: $('#pm option:selected').text() || '',
+                director: $('#director').val(),
+                director_name: $('#director option:selected').text() || '',
+                assistant: $('#assistant').val() || '',
+                assistant_name: $('#assistant option:selected').text() || ''
+            };
+
+            if (fileInput.files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    payload.contract_file = {
+                        name: fileInput.files[0].name,
+                        data: event.target.result.split(',')[1]
+                    };
+                    sendData(payload);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                sendData(payload);
+            }
+        });
+
+        function sendData(payload) {
+            $.ajax({
+                url: `${API_BASE}/submit-contract-v2`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function(response) {
+                    $('#loading').addClass('hidden');
+                    $('#submitBtn').prop('disabled', false).text('登録する');
+
+                    let html = '<div class="success">';
+                    html += '<h3>✅ 契約登録が完了しました!</h3>';
+                    html += `<p class="result-item"><strong>Company ID:</strong> ${response.company_id || 'N/A'}</p>`;
+                    html += `<p class="result-item"><strong>Deal ID:</strong> ${response.deal_id || 'N/A'}</p>`;
+                    if (response.file_url) {
+                        html += `<p class="result-item"><strong>契約書:</strong> <a href="${response.file_url}" target="_blank" style="color: #1976d2; text-decoration: underline;">${response.file_url}</a></p>`;
+                    } else {
+                        html += `<p class="result-item"><strong>契約書:</strong> 未添付</p>`;
+                    }
+                    html += '</div>';
+                    $('#result').html(html);
+                },
+                error: function(xhr) {
+                    $('#loading').addClass('hidden');
+                    $('#submitBtn').prop('disabled', false).text('登録する');
+                    $('#result').html(`<div class="error"><strong>エラー:</strong> ${xhr.responseText || 'Failed to fetch'}</div>`);
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>
