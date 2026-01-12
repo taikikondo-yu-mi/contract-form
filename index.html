@@ -350,6 +350,18 @@
                 </select>
             </div>
 
+            <!-- ★ 契約形態（新規追加） -->
+<div class="form-group">
+    <label for="contract_type">契約形態 <span class="required">*</span></label>
+    <select id="contract_type" name="contract_type" required>
+        <option value="">選択してください</option>
+        <option value="サーキュレーション案件">サーキュレーション案件</option>
+        <option value="長野銀行案件">長野銀行案件</option>
+        <option value="直接契約">直接契約</option>
+        <option value="ミライパートナー">ミライパートナー</option>
+    </select>
+</div>
+
             <div class="form-group">
                 <label for="contractFile">契約書PDF<span class="optional">(任意)</span></label>
                 <input type="file" id="contractFile" name="contractFile" accept=".pdf">
@@ -374,7 +386,6 @@
         $.get(`${API_BASE}/get-form-data`, function(data) {
             if (data.users) {
                 const userOptions = data.users.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
-                // ★ deal_owner も追加
                 $('#deal_owner, #pm, #director, #assistant').html('<option value="">選択してください</option>' + userOptions);
             }
             if (data.companies) {
@@ -383,7 +394,7 @@
             }
 
             // Select2初期化（★ deal_owner も追加）
-            $('#company, #deal_owner, #pm, #director, #assistant').select2({
+            $('#company, #deal_owner,#contract_type, #pm, #director, #assistant').select2({
                 placeholder: '検索または選択',
                 allowClear: true,
                 language: { 
@@ -420,8 +431,9 @@
             const payload = {
                 company_id: companyId,
                 company_name: companyName,
-                deal_owner: $('#deal_owner').val(),  // ★ 追加
-                deal_owner_name: $('#deal_owner option:selected').text() || '',  // ★ 追加
+                deal_owner: $('#deal_owner').val(),
+                deal_owner_name: $('#deal_owner option:selected').text() || '',
+                contract_type: $('#contract_type').val(),  // ★ 追加
                 pm: $('#pm').val(),
                 pm_name: $('#pm option:selected').text() || '',
                 director: $('#director').val(),
