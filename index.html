@@ -355,10 +355,10 @@
     <label for="contract_type">契約形態 <span class="required">*</span></label>
     <select id="contract_type" name="contract_type" required>
         <option value="">選択してください</option>
-        <option value="サーキュレーション案件">サーキュレーション案件</option>
-        <option value="長野銀行案件">長野銀行案件</option>
-        <option value="直接契約">直接契約</option>
-        <option value="ミライパートナー">ミライパートナー</option>
+        <option value="100">サーキュレーション案件</option>
+        <option value="300">長野八十二銀行案件</option>
+        <option value="900">直接契約</option>
+        <option value="1000">ミライパートナー</option>
     </select>
 </div>
 
@@ -433,7 +433,7 @@
                 company_name: companyName,
                 deal_owner: $('#deal_owner').val(),
                 deal_owner_name: $('#deal_owner option:selected').text() || '',
-                contract_type: $('#contract_type').val(),  // ★ 追加
+                contract_type: $('#contract_type').val(),  // ★ 追加（値は "100", "300", "900", "1000"）
                 pm: $('#pm').val(),
                 pm_name: $('#pm option:selected').text() || '',
                 director: $('#director').val(),
