@@ -450,6 +450,14 @@
                 contentType: 'application/json',
                 data: JSON.stringify(payload),
                 success: function(response) {
+// ★ デバッグ用: 実際のレスポンスを確認
+    console.log('📥 Response type:', typeof response);
+    console.log('📥 Is array?:', Array.isArray(response));
+    console.log('📥 Response:', response);
+    console.log('📥 response.company_id:', response.company_id);
+    console.log('📥 response[0]:', response[0]);
+    console.log('📥 response[0]?.company_id:', response[0]?.company_id);
+                    
                     $('#loading').addClass('hidden');
                     $('#submitBtn').prop('disabled', false).text('登録する');
 
