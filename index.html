@@ -444,54 +444,65 @@
         });
 
         function sendData(payload) {
-            $.ajax({
-                url: `${API_BASE}/submit-contract-v2`,
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(payload),
-                success: function(response) {
-// ★ デバッグ用: 実際のレスポンスを確認
-    console.log('📥 Response type:', typeof response);
-    console.log('📥 Is array?:', Array.isArray(response));
-    console.log('📥 Response:', response);
-    console.log('📥 response.company_id:', response.company_id);
-    console.log('📥 response[0]:', response[0]);
-    console.log('📥 response[0]?.company_id:', response[0]?.company_id);
+    $.ajax({
+        url: `${API_BASE}/submit-contract-v2`,
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log('📥 Raw response:', response);
+            
+            $('#loading').addClass('hidden');
+            $('#submitBtn').prop('disabled', false).text('登録する');
 
-                     // ★ 追加: オブジェクトの中身を全部見る
-    console.log('📥 Response keys:', Object.keys(response));
-    console.log('📥 Response values:', Object.values(response));
-    console.log('📥 Response.data:', response.data);
-    console.log('📥 Response.body:', response.body);
-    console.log('📥 Response.result:', response.result);
-    
-    // ★ 全プロパティをループで確認
-    for (let key in response) {
-        console.log(`📥 response.${key}:`, response[key]);
-    }
-                    
-                    $('#loading').addClass('hidden');
-                    $('#submitBtn').prop('disabled', false).text('登録する');
+            // ★ 修正: "object Object" キーの中身を取り出す
+            let data = response;
+            
+            // response の最初の値を取得（キー名が何であれ）
+            const keys = Object.keys(response);
+            if (keys.length > 0) {
+                const firstKey = keys[0];
+                console.log('📥 First key:', firstKey);
+                data = response[firstKey];
+            }
+            
+            console.log('📥 Final data:', data);
+            console.log('📥 company_id:', data.company_id);
 
-                    let html = '<div class="success">';
-                    html += '<h3>✅ 契約登録が完了しました!</h3>';
-                    html += `<p class="result-item"><strong>Company ID:</strong> ${response.company_id || 'N/A'}</p>`;
-                    html += `<p class="result-item"><strong>Deal ID:</strong> ${response.deal_id || 'N/A'}</p>`;
-                    if (response.file_url) {
-                        html += `<p class="result-item"><strong>契約書:</strong> <a href="${response.file_url}" target="_blank" style="color: #1976d2; text-decoration: underline;">${response.file_url}</a></p>`;
-                    } else {
-                        html += `<p class="result-item"><strong>契約書:</strong> 未添付</p>`;
-                    }
-                    html += '</div>';
-                    $('#result').html(html);
-                },
-                error: function(xhr) {
-                    $('#loading').addClass('hidden');
-                    $('#submitBtn').prop('disabled', false).text('登録する');
-                    $('#result').html(`<div class="error"><strong>エラー:</strong> ${xhr.responseText || 'Failed to fetch'}</div>`);
-                }
-            });
+            let html = '<div class="success">';
+            html += '<h3>✅ 契約登録が完了しました!</h3>';
+            html += `<p class="result-item"><strong>Company ID:</strong> ${data.company_id || 'N/A'}</p>`;
+            html += `<p class="result-item"><strong>Deal ID:</strong> ${data.deal_id || 'N/A'}</p>`;
+            if (data.file_url) {
+                html += `<p class="result-item"><strong>契約書:</strong> <a href="${data.file_url}" target="_blank" style="color: #1976d2; text-decoration: underline;">${data.file_name || data.file_url}</a></p>`;
+            } else {
+                html += `<p class="result-item"><strong>契約書:</strong> 未添付</p>`;
+            }
+            html += '</div>';
+            $('#result').html(html);
+            
+            // フォームリセット
+            $('#contractForm')[0].reset();
+            $('#company, #deal_owner, #pm, #director, #assistant').val(null).trigger('change');
+            $('#newCompanyGroup').addClass('hidden');
+        },
+        error: function(xhr) {
+            $('#loading').addClass('hidden');
+            $('#submitBtn').prop('disabled', false).text('登録する');
+            
+            let errorMsg = 'サーバーエラーが発生しました';
+            try {
+                const errorData = JSON.parse(xhr.responseText);
+                errorMsg = errorData.error || errorMsg;
+            } catch(e) {
+                errorMsg = xhr.responseText || errorMsg;
+            }
+            
+            $('#result').html(`<div class="error"><strong>❌ エラー:</strong> ${errorMsg}</div>`);
         }
+    });
+}
+
     });
 </script>
 </body>
