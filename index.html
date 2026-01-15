@@ -457,6 +457,18 @@
     console.log('📥 response.company_id:', response.company_id);
     console.log('📥 response[0]:', response[0]);
     console.log('📥 response[0]?.company_id:', response[0]?.company_id);
+
+                     // ★ 追加: オブジェクトの中身を全部見る
+    console.log('📥 Response keys:', Object.keys(response));
+    console.log('📥 Response values:', Object.values(response));
+    console.log('📥 Response.data:', response.data);
+    console.log('📥 Response.body:', response.body);
+    console.log('📥 Response.result:', response.result);
+    
+    // ★ 全プロパティをループで確認
+    for (let key in response) {
+        console.log(`📥 response.${key}:`, response[key]);
+    }
                     
                     $('#loading').addClass('hidden');
                     $('#submitBtn').prop('disabled', false).text('登録する');
