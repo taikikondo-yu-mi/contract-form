@@ -3,509 +3,476 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>契約登録フォーム</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Select2 CSS -->
+    <title>契約登録フォーム - HubSpot連携</title>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-    
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 2rem 0;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 40px 20px;
         }
-        .form-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 3rem;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        
+        .container { 
+            background: white; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2); 
+            max-width: 600px; 
+            width: 100%; 
+            padding: 50px 45px;
         }
-        .form-title {
-            color: #667eea;
-            font-weight: bold;
-            margin-bottom: 2rem;
+        
+        .header {
             text-align: center;
+            margin-bottom: 45px;
         }
-        .form-section {
-            margin-bottom: 2rem;
-            padding-bottom: 2rem;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        .form-section:last-of-type {
-            border-bottom: none;
-        }
-        .section-title {
-            color: #764ba2;
-            font-size: 1.2rem;
+        
+        .badge { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            padding: 8px 22px; 
+            border-radius: 25px; 
+            font-size: 14px; 
             font-weight: 600;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #667eea;
+            display: inline-block; 
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
-        .btn-submit {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            padding: 1rem 3rem;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 50px;
-            transition: transform 0.2s;
+        
+        h1 { 
+            font-size: 32px; 
+            margin-bottom: 12px; 
+            color: #1a202c; 
+            font-weight: 700;
         }
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        
+        .subtitle { 
+            color: #718096; 
+            font-size: 14px; 
+            line-height: 1.6;
         }
-        .alert {
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-top: 2rem;
+        
+        .form-group { 
+            margin-bottom: 28px; 
         }
-        .result-item {
-            padding: 0.75rem;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin-bottom: 0.75rem;
+        
+        label { 
+            display: block; 
+            font-weight: 600; 
+            margin-bottom: 10px; 
+            color: #2d3748; 
+            font-size: 15px; 
         }
-        .result-label {
+        
+        label .required {
+            color: #e53e3e;
+            margin-left: 4px;
+        }
+        
+        label .optional {
+            color: #a0aec0;
+            font-weight: 400;
+            font-size: 13px;
+            margin-left: 6px;
+        }
+        
+        input[type="text"] { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 10px; 
+            font-size: 15px; 
+            transition: all 0.2s;
+            background: #f7fafc;
+        }
+        
+        input[type="text"]:focus { 
+            outline: none; 
+            border-color: #667eea; 
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        input[type="file"] { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 2px dashed #cbd5e0; 
+            border-radius: 10px; 
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f7fafc;
+        }
+        
+        input[type="file"]:hover {
+            border-color: #667eea;
+            background: white;
+        }
+        
+        button { 
+            width: 100%; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 17px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled { 
+            background: #cbd5e0; 
+            cursor: not-allowed; 
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .success { 
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); 
+            border: 2px solid #9ae6b4; 
+            color: #22543d; 
+            padding: 25px; 
+            border-radius: 12px; 
+            margin-top: 30px; 
+        }
+        
+        .success h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #22543d;
+        }
+        
+        .error { 
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); 
+            border: 2px solid #fc8181; 
+            color: #742a2a; 
+            padding: 25px; 
+            border-radius: 12px; 
+            margin-top: 30px; 
+        }
+        
+        .result-item { 
+            margin: 10px 0; 
+            font-size: 15px; 
+            display: flex;
+            align-items: center;
+        }
+        
+        .result-item strong {
+            min-width: 120px;
+        }
+        
+        .select2-container { 
+            width: 100% !important; 
+        }
+        
+        .select2-container .select2-selection--single {
+            height: 52px !important;
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 10px !important;
+            background: #f7fafc !important;
+            transition: all 0.2s;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 48px !important;
+            padding-left: 16px !important;
+            padding-right: 40px !important;
+            color: #2d3748;
+            font-size: 15px;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #a0aec0;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 48px !important;
+            right: 12px !important;
+            width: 20px !important;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: #a0aec0 transparent transparent transparent !important;
+            border-width: 6px 5px 0 5px !important;
+            margin-left: -5px !important;
+            margin-top: -3px !important;
+        }
+        
+        .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+            border-color: transparent transparent #a0aec0 transparent !important;
+            border-width: 0 5px 6px 5px !important;
+            margin-top: -9px !important;
+        }
+        
+        .select2-container--default.select2-container--focus .select2-selection--single,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: #667eea !important;
+            background: white !important;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .select2-selection__clear {
+            display: none !important;
+        }
+        
+        .select2-dropdown {
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 10px !important;
+            margin-top: 4px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .select2-search--dropdown {
+            padding: 12px;
+        }
+        
+        .select2-search--dropdown .select2-search__field {
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            padding: 10px 12px !important;
+            font-size: 14px;
+        }
+        
+        .select2-search--dropdown .select2-search__field:focus {
+            border-color: #667eea !important;
+            outline: none;
+        }
+        
+        .select2-results__option {
+            padding: 12px 16px !important;
+            font-size: 14px;
+        }
+        
+        .select2-results__option--highlighted {
+            background-color: #f7fafc !important;
+            color: #2d3748 !important;
+        }
+        
+        .select2-results__option--selected {
+            background-color: #667eea !important;
+            color: white !important;
+        }
+        
+        .hidden { 
+            display: none; 
+        }
+        
+        #loading { 
+            text-align: center; 
+            margin-top: 20px; 
+            color: #667eea; 
             font-weight: 600;
-            color: #667eea;
-            margin-right: 0.5rem;
+            font-size: 15px;
         }
-        .select2-container {
-            width: 100% !important;
+        
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid #667eea;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
         }
-        .required-mark {
-            color: #dc3545;
-            margin-left: 0.25rem;
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="form-container">
-            <h1 class="form-title">📝 契約登録フォーム</h1>
-            
-            <form id="contractForm">
-                <!-- 会社情報セクション -->
-                <div class="form-section">
-                    <h2 class="section-title">🏢 会社情報</h2>
-                    
-                    <div class="mb-3">
-                        <label for="company" class="form-label">
-                            会社名<span class="required-mark">*</span>
-                        </label>
-                        <select id="company" name="company_id" class="form-select" required>
-                            <option value="">選択してください</option>
-                        </select>
-                    </div>
-                    
-                    <div id="newCompanyInput" style="display: none;">
-                        <div class="mb-3">
-                            <label for="new_company_name" class="form-label">
-                                新規会社名<span class="required-mark">*</span>
-                            </label>
-                            <input type="text" class="form-control" id="new_company_name" name="new_company_name" placeholder="株式会社〇〇">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 担当者情報セクション -->
-                <div class="form-section">
-                    <h2 class="section-title">👥 担当者情報</h2>
-                    
-                    <div class="mb-3">
-                        <label for="deal_owner" class="form-label">
-                            取引担当者<span class="required-mark">*</span>
-                        </label>
-                        <select id="deal_owner" name="deal_owner" class="form-select" required>
-                            <option value="">選択してください</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="pm" class="form-label">
-                            PM (プロジェクトマネージャー)<span class="required-mark">*</span>
-                        </label>
-                        <select id="pm" name="pm" class="form-select" required>
-                            <option value="">選択してください</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="director" class="form-label">
-                            ディレクター<span class="required-mark">*</span>
-                        </label>
-                        <select id="director" name="director" class="form-select" required>
-                            <option value="">選択してください</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="assistant" class="form-label">
-                            アシスタント<span class="required-mark">*</span>
-                        </label>
-                        <select id="assistant" name="assistant" class="form-select" required>
-                            <option value="">選択してください</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- 契約書アップロードセクション -->
-                <div class="form-section">
-                    <h2 class="section-title">📄 契約書</h2>
-                    
-                    <div class="mb-3">
-                        <label for="contract_file" class="form-label">
-                            契約書PDF (任意)
-                        </label>
-                        <input type="file" class="form-control" id="contract_file" name="contract_file" accept=".pdf">
-                        <div class="form-text">PDFファイルのみアップロード可能です</div>
-                    </div>
-                </div>
-
-                <!-- 送信ボタン -->
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary btn-submit">
-                        ✨ 契約を登録する
-                    </button>
-                </div>
-            </form>
-
-            <!-- 成功メッセージ -->
-            <div id="successMessage" class="alert alert-success" style="display: none;">
-                <h4 class="alert-heading">✅ 契約登録が完了しました!</h4>
-                <hr>
-                <div class="result-item">
-                    <span class="result-label">Company ID:</span>
-                    <span id="companyIdDisplay">N/A</span>
-                </div>
-                <div class="result-item">
-                    <span class="result-label">Deal ID:</span>
-                    <span id="dealIdDisplay">N/A</span>
-                </div>
-                <div class="result-item">
-                    <span class="result-label">契約書:</span>
-                    <span id="fileDisplay">未添付</span>
-                </div>
-            </div>
-
-            <!-- エラーメッセージ -->
-            <div id="errorMessage" class="alert alert-danger" style="display: none;">
-                <h4 class="alert-heading">❌ エラーが発生しました</h4>
-                <p id="errorDetails"></p>
-            </div>
+        <div class="header">
+            <span class="badge">🚀 Production</span>
+            <h1>📋 契約登録フォーム</h1>
+            <p class="subtitle">HubSpot連携 - 会社 + 担当者 + Deal + 契約書</p>
         </div>
+
+        <form id="contractForm">
+            <div class="form-group">
+                <label for="company">会社<span class="required">*</span></label>
+                <select id="company" name="company" required>
+                    <option value="">読み込み中...</option>
+                </select>
+            </div>
+
+            <div class="form-group hidden" id="newCompanyGroup">
+                <label for="companyName">新規会社名<span class="required">*</span></label>
+                <input type="text" id="companyName" name="companyName" placeholder="例: 株式会社サンプル">
+            </div>
+
+            <div class="form-group">
+                 <label for="deal_owner">契約窓口<span class="required">*</span></label>
+                 <select id="deal_owner" name="deal_owner" required>
+                    <option value="">読み込み中...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="pm">プロジェクトマネージャー<span class="required">*</span></label>
+                <select id="pm" name="pm" required>
+                    <option value="">読み込み中...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="director">ディレクター<span class="required">*</span></label>
+                <select id="director" name="director" required>
+                    <option value="">読み込み中...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="assistant">アシスタント<span class="optional">(任意)</span></label>
+                <select id="assistant" name="assistant">
+                    <option value="">読み込み中...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="contractFile">契約書PDF<span class="optional">(任意)</span></label>
+                <input type="file" id="contractFile" name="contractFile" accept=".pdf">
+            </div>
+
+            <button type="submit" id="submitBtn">登録する</button>
+            <div id="loading" class="hidden">
+                <span class="spinner"></span>処理中...
+            </div>
+        </form>
+
+        <div id="result"></div>
     </div>
 
-    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    const API_BASE = 'https://kumamon-n8n.xvps.jp/webhook';
 
-    <script>
-        // ========================================
-        // 設定
-        // ========================================
-        const API_BASE = 'https://kumamon-n8n.xvps.jp/webhook';
-        const HUBSPOT_ACCOUNT_ID = '48328782';
+    $(document).ready(function() {
+        // データ取得
+        $.get(`${API_BASE}/get-form-data`, function(data) {
+            if (data.users) {
+                const userOptions = data.users.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
+                $('#deal_owner, #pm, #director, #assistant').html('<option value="">選択してください</option>' + userOptions);
+            }
+            if (data.companies) {
+                const companyOptions = data.companies.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
+                $('#company').html('<option value="">選択してください</option>' + companyOptions);
+            }
 
-        // ========================================
-        // 初期化
-        // ========================================
-        $(document).ready(function() {
-            console.log('🚀 フォーム初期化開始');
-            
-            // Select2 初期化
-            initializeSelect2();
-            
-            // データ読み込み
-            loadFormData();
-            
-            // イベントリスナー設定
-            setupEventListeners();
+            // Select2初期化（★ deal_owner も追加）
+            $('#company, #deal_owner, #pm, #director, #assistant').select2({
+                placeholder: '検索または選択',
+                allowClear: true,
+                language: { 
+                    noResults: () => '該当なし',
+                    searching: () => '検索中...'
+                }
+            });
+        }).fail(function() {
+            alert('データの読み込みに失敗しました。ページを再読み込みしてください。');
         });
 
-        // ========================================
-        // Select2 初期化
-        // ========================================
-        function initializeSelect2() {
-            const select2Config = {
-                theme: 'bootstrap-5',
-                placeholder: '選択してください',
-                allowClear: true,
-                width: '100%'
-            };
-
-            $('#company').select2(select2Config);
-            $('#deal_owner').select2(select2Config);
-            $('#pm').select2(select2Config);
-            $('#director').select2(select2Config);
-            $('#assistant').select2(select2Config);
-            
-            console.log('✅ Select2 初期化完了');
-        }
-
-        // ========================================
-        // フォームデータ読み込み
-        // ========================================
-        async function loadFormData() {
-            try {
-                console.log('📥 フォームデータ取得中...');
-                
-                const response = await fetch(`${API_BASE}/get-form-data`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                console.log('📦 取得データ:', data);
-                
-                // 会社リスト
-                if (data.companies) {
-                    $('#company').append('<option value="_new_">【新規作成】</option>');
-                    data.companies.forEach(company => {
-                        $('#company').append(
-                            `<option value="${company.id}">${company.name}</option>`
-                        );
-                    });
-                    console.log(`✅ 会社: ${data.companies.length}件`);
-                }
-                
-                // オーナーリスト
-                if (data.owners) {
-                    data.owners.forEach(owner => {
-                        const option = `<option value="${owner.id}">${owner.name}</option>`;
-                        $('#deal_owner').append(option);
-                        $('#pm').append(option);
-                        $('#director').append(option);
-                        $('#assistant').append(option);
-                    });
-                    console.log(`✅ オーナー: ${data.owners.length}件`);
-                }
-                
-                console.log('✅ フォームデータ読み込み完了');
-                
-            } catch (error) {
-                console.error('❌ データ読み込みエラー:', error);
-                alert('データの読み込みに失敗しました。ページをリロードしてください。');
+        // 新規会社選択時の表示切替
+        $('#company').on('change', function() {
+            if ($(this).val() === '_new_') {
+                $('#newCompanyGroup').removeClass('hidden');
+                $('#companyName').prop('required', true);
+            } else {
+                $('#newCompanyGroup').addClass('hidden');
+                $('#companyName').prop('required', false);
             }
-        }
+        });
 
-        // ========================================
-        // イベントリスナー設定
-        // ========================================
-        function setupEventListeners() {
-            // 会社選択時の処理
-            $('#company').on('change', function() {
-                const isNewCompany = $(this).val() === '_new_';
-                const newCompanyInput = document.getElementById('newCompanyInput');
-                const newCompanyField = document.getElementById('new_company_name');
-                
-                if (isNewCompany) {
-                    newCompanyInput.style.display = 'block';
-                    newCompanyField.required = true;
-                } else {
-                    newCompanyInput.style.display = 'none';
-                    newCompanyField.required = false;
-                    newCompanyField.value = '';
-                }
-            });
-
-            // フォーム送信処理
-            document.getElementById('contractForm').addEventListener('submit', handleFormSubmit);
-        }
-
-        // ========================================
-        // フォーム送信処理
-        // ========================================
-        async function handleFormSubmit(e) {
+        // フォーム送信
+        $('#contractForm').on('submit', function(e) {
             e.preventDefault();
-            
-            const submitButton = this.querySelector('button[type="submit"]');
-            const originalText = submitButton.textContent;
-            submitButton.disabled = true;
-            submitButton.textContent = '送信中...';
-            
-            // メッセージを非表示
-            document.getElementById('successMessage').style.display = 'none';
-            document.getElementById('errorMessage').style.display = 'none';
-            
-            try {
-                // ペイロード作成
-                const payload = await createPayload();
-                console.log('📤 送信ペイロード:', payload);
-                
-                // API送信
-                const response = await fetch(`${API_BASE}/submit-contract-v2`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                console.log('📥 APIレスポンス:', result);
-                
-                if (response.ok && result.success) {
-                    // 成功時の処理
-                    handleSuccess(result);
-                } else {
-                    throw new Error(result.error || '登録に失敗しました');
-                }
-                
-            } catch (error) {
-                console.error('❌ エラー:', error);
-                handleError(error);
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = originalText;
-            }
-        }
+            $('#submitBtn').prop('disabled', true).text('送信中...');
+            $('#loading').removeClass('hidden');
+            $('#result').html('');
 
-        // ========================================
-        // ペイロード作成
-        // ========================================
-        async function createPayload() {
-            const formData = new FormData(document.getElementById('contractForm'));
-            
-            // 基本データ
+            const companyId = $('#company').val();
+            const companyName = companyId === '_new_' ? $('#companyName').val() : $('#company option:selected').text();
+            const fileInput = $('#contractFile')[0];
+
             const payload = {
-                company_id: formData.get('company_id'),
-                company_name: getCompanyName(formData),
-                deal_owner: formData.get('deal_owner'),
-                deal_owner_name: $('#deal_owner').find(':selected').text(),
-                pm: formData.get('pm'),
-                pm_name: $('#pm').find(':selected').text(),
-                director: formData.get('director'),
-                director_name: $('#director').find(':selected').text(),
-                assistant: formData.get('assistant'),
-                assistant_name: $('#assistant').find(':selected').text()
+                company_id: companyId,
+                company_name: companyName,
+                deal_owner: $('#deal_owner').val(),
+                deal_owner_name: $('#deal_owner option:selected').text() || '',
+                pm: $('#pm').val(),
+                pm_name: $('#pm option:selected').text() || '',
+                director: $('#director').val(),
+                director_name: $('#director option:selected').text() || '',
+                assistant: $('#assistant').val() || '',
+                assistant_name: $('#assistant option:selected').text() || ''
             };
-            
-            // ファイル処理
-            const fileInput = document.getElementById('contract_file');
+
             if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const base64 = await fileToBase64(file);
-                
-                payload.contract_file = {
-                    name: file.name,
-                    data: base64
-                };
-                
-                console.log('📎 ファイル添付:', file.name);
-            }
-            
-            return payload;
-        }
-
-        // ========================================
-        // 会社名取得
-        // ========================================
-        function getCompanyName(formData) {
-            const companyId = formData.get('company_id');
-            
-            if (companyId === '_new_') {
-                return formData.get('new_company_name');
-            } else {
-                return $('#company').find(':selected').text();
-            }
-        }
-
-        // ========================================
-        // ファイル → Base64 変換
-        // ========================================
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    const base64 = e.target.result.split(',')[1];
-                    resolve(base64);
+                reader.onload = function(event) {
+                    payload.contract_file = {
+                        name: fileInput.files[0].name,
+                        data: event.target.result.split(',')[1]
+                    };
+                    sendData(payload);
                 };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                sendData(payload);
+            }
+        });
+
+        function sendData(payload) {
+            $.ajax({
+                url: `${API_BASE}/submit-contract-v2`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function(response) {
+                    $('#loading').addClass('hidden');
+                    $('#submitBtn').prop('disabled', false).text('登録する');
+
+                    let html = '<div class="success">';
+                    html += '<h3>✅ 契約登録が完了しました!</h3>';
+                    html += `<p class="result-item"><strong>Company ID:</strong> ${response.company_id || 'N/A'}</p>`;
+                    html += `<p class="result-item"><strong>Deal ID:</strong> ${response.deal_id || 'N/A'}</p>`;
+                    if (response.file_url) {
+                        html += `<p class="result-item"><strong>契約書:</strong> <a href="${response.file_url}" target="_blank" style="color: #1976d2; text-decoration: underline;">${response.file_url}</a></p>`;
+                    } else {
+                        html += `<p class="result-item"><strong>契約書:</strong> 未添付</p>`;
+                    }
+                    html += '</div>';
+                    $('#result').html(html);
+                },
+                error: function(xhr) {
+                    $('#loading').addClass('hidden');
+                    $('#submitBtn').prop('disabled', false).text('登録する');
+                    $('#result').html(`<div class="error"><strong>エラー:</strong> ${xhr.responseText || 'Failed to fetch'}</div>`);
+                }
             });
         }
-
-        // ========================================
-        // 成功時の処理
-        // ========================================
-        function handleSuccess(result) {
-            console.log('✅ 登録成功:', result);
-            
-            // 成功メッセージ表示
-            document.getElementById('successMessage').style.display = 'block';
-            
-            // Company ID
-            document.getElementById('companyIdDisplay').textContent = 
-                result.company_id || 'N/A';
-            
-            // Deal ID
-            document.getElementById('dealIdDisplay').textContent = 
-                result.deal_id || 'N/A';
-            
-            // ファイル情報
-            const fileDisplay = document.getElementById('fileDisplay');
-            if (result.file_name && result.file_url) {
-                fileDisplay.innerHTML = `
-                    <a href="${result.file_url}" target="_blank" class="text-decoration-none">
-                        📄 ${result.file_name}
-                    </a>
-                `;
-            } else {
-                fileDisplay.textContent = '未添付';
-            }
-            
-            // フォームをリセット
-            resetForm();
-            
-            // ページトップにスクロール
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // ========================================
-        // エラー時の処理
-        // ========================================
-        function handleError(error) {
-            console.error('❌ 登録エラー:', error);
-            
-            // エラーメッセージ表示
-            document.getElementById('errorMessage').style.display = 'block';
-            document.getElementById('errorDetails').textContent = error.message;
-            
-            // ページトップにスクロール
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // ========================================
-        // フォームリセット
-        // ========================================
-        function resetForm() {
-            document.getElementById('contractForm').reset();
-            
-            // Select2 リセット
-            $('#company').val(null).trigger('change');
-            $('#deal_owner').val(null).trigger('change');
-            $('#pm').val(null).trigger('change');
-            $('#director').val(null).trigger('change');
-            $('#assistant').val(null).trigger('change');
-            
-            // 新規会社入力欄を非表示
-            document.getElementById('newCompanyInput').style.display = 'none';
-            document.getElementById('new_company_name').required = false;
-        }
-    </script>
+    });
+</script>
 </body>
 </html>
