@@ -450,42 +450,43 @@
         contentType: 'application/json',
         data: JSON.stringify(payload),
         success: function(response) {
-            console.log('📥 Raw response:', response);
-            
-            $('#loading').addClass('hidden');
-            $('#submitBtn').prop('disabled', false).text('登録する');
+    console.log('📥 Raw response:', response);
+    
+    $('#loading').addClass('hidden');
+    $('#submitBtn').prop('disabled', false).text('登録する');
 
-            // ★ 修正: "object Object" キーの中身を取り出す
-            let data = response;
-            
-            // response の最初の値を取得（キー名が何であれ）
-            const keys = Object.keys(response);
-            if (keys.length > 0) {
-                const firstKey = keys[0];
-                console.log('📥 First key:', firstKey);
-                data = response[firstKey];
-            }
-            
-            console.log('📥 Final data:', data);
-            console.log('📥 company_id:', data.company_id);
+    let data = response;
+    
+    console.log('📥 Final data:', data);
+    console.log('📥 company_id:', data.company_id);
+    console.log('📥 file_name:', data.file_name);
+    console.log('📥 google_drive_url:', data.google_drive_url);
 
-            let html = '<div class="success">';
-            html += '<h3>✅ 契約登録が完了しました!</h3>';
-            html += `<p class="result-item"><strong>Company ID:</strong> ${data.company_id || 'N/A'}</p>`;
-            html += `<p class="result-item"><strong>Deal ID:</strong> ${data.deal_id || 'N/A'}</p>`;
-            if (data.file_url) {
-                html += `<p class="result-item"><strong>契約書:</strong> <a href="${data.file_url}" target="_blank" style="color: #1976d2; text-decoration: underline;">${data.file_name || data.file_url}</a></p>`;
-            } else {
-                html += `<p class="result-item"><strong>契約書:</strong> 未添付</p>`;
-            }
-            html += '</div>';
-            $('#result').html(html);
-            
-            // フォームリセット
-            $('#contractForm')[0].reset();
-            $('#company, #deal_owner, #pm, #director, #assistant').val(null).trigger('change');
-            $('#newCompanyGroup').addClass('hidden');
-        },
+    let html = '<div class="success">';
+    html += '<h3>✅ 契約登録が完了しました!</h3>';
+    html += `<p class="result-item"><strong>Company ID:</strong> ${data.company_id || 'N/A'}</p>`;
+    html += `<p class="result-item"><strong>Deal ID:</strong> ${data.deal_id || 'N/A'}</p>`;
+    
+    // ★ 修正: google_drive_url も確認
+    if (data.google_drive_url || data.file_url) {
+        const fileUrl = data.google_drive_url || data.file_url;
+        const fileName = data.file_name || fileUrl;
+        html += `<p class="result-item"><strong>契約書:</strong> <a href="${fileUrl}" target="_blank" style="color: #1976d2; text-decoration: underline;">${fileName}</a></p>`;
+    } else {
+        html += `<p class="result-item"><strong>契約書:</strong> 未添付</p>`;
+    }
+    
+    html += '</div>';
+    $('#result').html(html);
+    
+    // フォームをリセット
+    $('#contractForm')[0].reset();
+    $('.select2').val(null).trigger('change');
+    $('#newCompanyGroup').hide();
+    
+    // ページトップへスクロール
+    $('html, body').animate({ scrollTop: 0 }, 500);
+},
         error: function(xhr) {
             $('#loading').addClass('hidden');
             $('#submitBtn').prop('disabled', false).text('登録する');
