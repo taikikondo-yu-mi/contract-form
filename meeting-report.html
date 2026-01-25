@@ -405,190 +405,191 @@
     </div>
 
     <script>
-        const N8N_DATA_API_URL = 'https://kumamon-n8n.xvps.jp/webhook/get-meeting-form-data';
-        const N8N_WEBHOOK_URL = 'https://kumamon-n8n.xvps.jp/webhook/submit-meeting-report';
+        const API_BASE = 'https://kumamon-n8n.xvps.jp/webhook';
 
-        // ページ読み込み時に会社リストとユーザーリストを取得
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadFormData();
-            setupEventListeners();
-            setTodayDate();
+// ページ読み込み時にフォームデータを取得
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadFormData();
+    setupEventListeners();
+    setTodayDate();
+});
+
+// 今日の日付をデフォルトでセット
+function setTodayDate() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('meetingDate').value = today;
+}
+
+// フォームデータを一括取得(n8n経由)
+async function loadFormData() {
+    const companySelect = document.getElementById('companySelect');
+    const dealOwnerSelect = document.getElementById('dealOwner');
+    
+    try {
+        console.log('n8nからフォームデータを取得中...');
+        
+        const response = await fetch(`${API_BASE}/get-meeting-form-data`);
+
+        if (!response.ok) throw new Error('フォームデータの取得に失敗しました');
+
+        const data = await response.json();
+        console.log('取得データ:', data);
+
+        if (!data.success) throw new Error('データ取得APIがエラーを返しました');
+
+        // 会社リストを設定
+        companySelect.innerHTML = '<option value="">選択してください</option>';
+        data.companies.forEach(company => {
+            const option = document.createElement('option');
+            option.value = company.value;
+            option.textContent = company.label;
+            companySelect.appendChild(option);
         });
 
-        // 今日の日付をデフォルトでセット
-        function setTodayDate() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('meetingDate').value = today;
-        }
+        // ユーザーリストを設定
+        dealOwnerSelect.innerHTML = '<option value="">選択してください</option>';
+        data.users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.value;
+            option.textContent = user.label;
+            option.dataset.name = user.label;
+            dealOwnerSelect.appendChild(option);
+        });
 
-        // フォームデータを一括取得(n8n経由)
-        async function loadFormData() {
-            const companySelect = document.getElementById('companySelect');
-            const dealOwnerSelect = document.getElementById('dealOwner');
-            
-            try {
-                console.log('n8nからフォームデータを取得中...');
-                const response = await fetch(N8N_DATA_API_URL);
-
-                if (!response.ok) throw new Error('フォームデータの取得に失敗しました');
-
-                const data = await response.json();
-                console.log('取得データ:', data);
-
-                if (!data.success) throw new Error('データ取得APIがエラーを返しました');
-
-                // 会社リストを設定
-                companySelect.innerHTML = '<option value="">選択してください</option>';
-                data.companies.forEach(company => {
-                    const option = document.createElement('option');
-                    option.value = company.value;
-                    option.textContent = company.label;
-                    companySelect.appendChild(option);
-                });
-
-                // ユーザーリストを設定
-                dealOwnerSelect.innerHTML = '<option value="">選択してください</option>';
-                data.users.forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user.value;
-                    option.textContent = user.label;
-                    option.dataset.name = user.label;
-                    dealOwnerSelect.appendChild(option);
-                });
-
-                // ★ Introduction(経路)の選択肢を設定
-                const introductionSelect = document.getElementById('introduction');
-                introductionSelect.innerHTML = '<option value="">選択してください</option>';
-                if (data.propertyOptions && data.propertyOptions.introduction) {
-                    data.propertyOptions.introduction.forEach(option => {
-                        const opt = document.createElement('option');
-                        opt.value = option.value;
-                        opt.textContent = option.label;
-                        introductionSelect.appendChild(opt);
-                    });
-                    console.log(`✅ 経路の選択肢: ${data.propertyOptions.introduction.length}件`);
-                }
-
-                console.log(`✅ 会社: ${data.companies.length}件, ユーザー: ${data.users.length}件`);
-
-            } catch (error) {
-                console.error('Error loading form data:', error);
-                companySelect.innerHTML = '<option value="_new_">🆕 新規会社</option>';
-                dealOwnerSelect.innerHTML = '<option value="">担当者の取得に失敗</option>';
-                showMessage('フォームデータの取得に失敗しました。新規会社のみ登録可能です。', 'error');
-            }
-        }
-
-        // イベントリスナーの設定
-        function setupEventListeners() {
-            // 会社選択の変更
-            document.getElementById('companySelect').addEventListener('change', (e) => {
-                const companyNameGroup = document.getElementById('companyNameGroup');
-                const companyNameInput = document.getElementById('companyName');
-                
-                if (e.target.value === '_new_') {
-                    companyNameGroup.classList.add('active');
-                    companyNameInput.required = true;
-                } else {
-                    companyNameGroup.classList.remove('active');
-                    companyNameInput.required = false;
-                    companyNameInput.value = '';
-                }
+        // Introduction(経路)の選択肢を設定
+        const introductionSelect = document.getElementById('introduction');
+        introductionSelect.innerHTML = '<option value="">選択してください</option>';
+        if (data.propertyOptions && data.propertyOptions.introduction) {
+            data.propertyOptions.introduction.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option.value;
+                opt.textContent = option.label;
+                introductionSelect.appendChild(opt);
             });
-
-            // フォーム送信
-            document.getElementById('meetingReportForm').addEventListener('submit', handleSubmit);
+            console.log(`✅ 経路の選択肢: ${data.propertyOptions.introduction.length}件`);
         }
 
-        // フォーム送信処理
-        async function handleSubmit(e) {
-            e.preventDefault();
+        console.log(`✅ 会社: ${data.companies.length}件, ユーザー: ${data.users.length}件`);
 
-            const submitBtn = document.getElementById('submitBtn');
-            const loading = document.getElementById('loading');
-            const messageDiv = document.getElementById('message');
+    } catch (error) {
+        console.error('Error loading form data:', error);
+        companySelect.innerHTML = '<option value="_new_">🆕 新規会社</option>';
+        dealOwnerSelect.innerHTML = '<option value="">担当者の取得に失敗</option>';
+        showMessage('フォームデータの取得に失敗しました。新規会社のみ登録可能です。', 'error');
+    }
+}
 
-            // ボタンを無効化
-            submitBtn.disabled = true;
-            loading.classList.add('active');
-            messageDiv.classList.remove('active');
+// イベントリスナーの設定
+function setupEventListeners() {
+    // 会社選択の変更
+    document.getElementById('companySelect').addEventListener('change', (e) => {
+        const companyNameGroup = document.getElementById('companyNameGroup');
+        const companyNameInput = document.getElementById('companyName');
+        
+        if (e.target.value === '_new_') {
+            companyNameGroup.classList.add('active');
+            companyNameInput.required = true;
+        } else {
+            companyNameGroup.classList.remove('active');
+            companyNameInput.required = false;
+            companyNameInput.value = '';
+        }
+    });
 
-            try {
-                // フォームデータを取得
-                const formData = new FormData(e.target);
-                const data = {
-                    company_id: formData.get('company_id'),
-                    company_name: formData.get('company_id') === '_new_' ? formData.get('company_name') : '',
-                    state: formData.get('state'),
-                    introduction: formData.get('introduction'),
-                    industry_occupation: formData.get('industry_occupation'),
-                    job_type: formData.get('job_type'),
-                    consultation_date: formData.get('consultation_date'),
-                    meeting_date: formData.get('meeting_date'),
-                    deal_owner: formData.get('deal_owner') || '',
-                    deal_owner_name: getDealOwnerName()
-                };
+    // フォーム送信
+    document.getElementById('meetingReportForm').addEventListener('submit', handleSubmit);
+}
 
-                console.log('送信データ:', data);
+// フォーム送信処理
+async function handleSubmit(e) {
+    e.preventDefault();
 
-                // n8nに送信
-                const response = await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
+    const submitBtn = document.getElementById('submitBtn');
+    const loading = document.getElementById('loading');
+    const messageDiv = document.getElementById('message');
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+    // ボタンを無効化
+    submitBtn.disabled = true;
+    loading.classList.add('active');
+    messageDiv.classList.remove('active');
 
-                const result = await response.json();
-                console.log('レスポンス:', result);
+    try {
+        // フォームデータを取得
+        const formData = new FormData(e.target);
+        const data = {
+            company_id: formData.get('company_id'),
+            company_name: formData.get('company_id') === '_new_' ? formData.get('company_name') : '',
+            state: formData.get('state'),
+            introduction: formData.get('introduction'),
+            industry_occupation: formData.get('industry_occupation'),
+            job_type: formData.get('job_type'),
+            consultation_date: formData.get('consultation_date'),
+            meeting_date: formData.get('meeting_date'),
+            deal_owner: formData.get('deal_owner') || '',
+            deal_owner_name: getDealOwnerName()
+        };
 
-                if (result.success) {
-                    const actionText = result.is_new_deal ? '新規取引が作成' : '既存取引が更新';
-                    showMessage(
-                        `✅ 商談報告が完了しました!(${actionText})<br>` +
-                        `会社: ${result.company_name}<br>` +
-                        `Deal ID: ${result.deal_id}<br>` +
-                        `<a href="${result.hubspot_deal_url}" target="_blank">HubSpotで確認 →</a>`,
-                        'success'
-                    );
-                    
-                    // フォームをリセット
-                    setTimeout(() => {
-                        e.target.reset();
-                        document.getElementById('companyNameGroup').classList.remove('active');
-                        setTodayDate();
-                    }, 2000);
-                } else {
-                    throw new Error(result.error || '登録に失敗しました');
-                }
+        console.log('送信データ:', data);
 
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage(`❌ エラーが発生しました: ${error.message}`, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                loading.classList.remove('active');
-            }
+        // n8nに送信
+        const response = await fetch(`${API_BASE}/submit-meeting-report`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // 取引担当者名を取得
-        function getDealOwnerName() {
-            const select = document.getElementById('dealOwner');
-            const selectedOption = select.options[select.selectedIndex];
-            return selectedOption.dataset.name || '';
+        const result = await response.json();
+        console.log('レスポンス:', result);
+
+        if (result.success) {
+            const actionText = result.is_new_deal ? '新規取引が作成' : '既存取引が更新';
+            showMessage(
+                `✅ 商談報告が完了しました!(${actionText})<br>` +
+                `会社: ${result.company_name}<br>` +
+                `Deal ID: ${result.deal_id}<br>` +
+                `<a href="${result.hubspot_deal_url}" target="_blank">HubSpotで確認 →</a>`,
+                'success'
+            );
+            
+            // フォームをリセット
+            setTimeout(() => {
+                e.target.reset();
+                document.getElementById('companyNameGroup').classList.remove('active');
+                setTodayDate();
+            }, 2000);
+        } else {
+            throw new Error(result.error || '登録に失敗しました');
         }
 
-        // メッセージ表示
-        function showMessage(text, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.innerHTML = text;
-            messageDiv.className = `message ${type} active`;
-        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage(`❌ エラーが発生しました: ${error.message}`, 'error');
+    } finally {
+        submitBtn.disabled = false;
+        loading.classList.remove('active');
+    }
+}
+
+// 取引担当者名を取得
+function getDealOwnerName() {
+    const select = document.getElementById('dealOwner');
+    const selectedOption = select.options[select.selectedIndex];
+    return selectedOption.dataset.name || '';
+}
+
+// メッセージ表示
+function showMessage(text, type) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.innerHTML = text;
+    messageDiv.className = `message ${type} active`;
+}
+
     </script>
 </body>
 </html>
