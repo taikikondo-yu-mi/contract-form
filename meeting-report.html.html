@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新規商談報告フォーム - 株式会社ユウミ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #667eea;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #e74c3c;
+            margin-left: 4px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input[type="text"]:disabled,
+        select:disabled {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            display: none;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.active {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message a {
+            color: inherit;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        #companyNameGroup {
+            display: none;
+        }
+
+        #companyNameGroup.active {
+            display: block;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 新規商談報告フォーム</h1>
+        <p class="subtitle">株式会社ユウミ</p>
+
+        <div class="info-box">
+            💡 既存の会社を選択した場合、その会社の最新取引が更新されます。新規の場合は取引が作成されます。
+        </div>
+
+        <form id="meetingReportForm">
+            <!-- 会社情報セクション -->
+            <div class="form-section">
+                <div class="section-title">🏢 会社情報</div>
+                
+                <div class="form-group">
+                    <label for="companySelect">会社選択<span class="required">*</span></label>
+                    <select id="companySelect" name="company_id" required>
+                        <option value="">読み込み中...</option>
+                    </select>
+                    <div class="help-text">既存の会社を選択するか、「新規会社」を選択してください</div>
+                </div>
+
+                <div id="companyNameGroup" class="form-group">
+                    <label for="companyName">会社名<span class="required">*</span></label>
+                    <input type="text" id="companyName" name="company_name" placeholder="例: 株式会社サンプル">
+                </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label for="state">都道府県<span class="required">*</span></label>
+                        <select id="state" name="state" required>
+                            <option value="">選択してください</option>
+                            <option value="北海道">北海道</option>
+                            <option value="青森県">青森県</option>
+                            <option value="岩手県">岩手県</option>
+                            <option value="宮城県">宮城県</option>
+                            <option value="秋田県">秋田県</option>
+                            <option value="山形県">山形県</option>
+                            <option value="福島県">福島県</option>
+                            <option value="茨城県">茨城県</option>
+                            <option value="栃木県">栃木県</option>
+                            <option value="群馬県">群馬県</option>
+                            <option value="埼玉県">埼玉県</option>
+                            <option value="千葉県">千葉県</option>
+                            <option value="東京都">東京都</option>
+                            <option value="神奈川県">神奈川県</option>
+                            <option value="新潟県">新潟県</option>
+                            <option value="富山県">富山県</option>
+                            <option value="石川県">石川県</option>
+                            <option value="福井県">福井県</option>
+                            <option value="山梨県">山梨県</option>
+                            <option value="長野県">長野県</option>
+                            <option value="岐阜県">岐阜県</option>
+                            <option value="静岡県">静岡県</option>
+                            <option value="愛知県">愛知県</option>
+                            <option value="三重県">三重県</option>
+                            <option value="滋賀県">滋賀県</option>
+                            <option value="京都府">京都府</option>
+                            <option value="大阪府">大阪府</option>
+                            <option value="兵庫県">兵庫県</option>
+                            <option value="奈良県">奈良県</option>
+                            <option value="和歌山県">和歌山県</option>
+                            <option value="鳥取県">鳥取県</option>
+                            <option value="島根県">島根県</option>
+                            <option value="岡山県">岡山県</option>
+                            <option value="広島県">広島県</option>
+                            <option value="山口県">山口県</option>
+                            <option value="徳島県">徳島県</option>
+                            <option value="香川県">香川県</option>
+                            <option value="愛媛県">愛媛県</option>
+                            <option value="高知県">高知県</option>
+                            <option value="福岡県">福岡県</option>
+                            <option value="佐賀県">佐賀県</option>
+                            <option value="長崎県">長崎県</option>
+                            <option value="熊本県">熊本県</option>
+                            <option value="大分県">大分県</option>
+                            <option value="宮崎県">宮崎県</option>
+                            <option value="鹿児島県">鹿児島県</option>
+                            <option value="沖縄県">沖縄県</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="introduction">経路<span class="required">*</span></label>
+                        <select id="introduction" name="introduction" required>
+                            <option value="">読み込み中...</option>
+                        </select>
+                        <div class="help-text">HubSpotと連動しています</div>
+                    </div>
+                </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label for="industryOccupation">業種<span class="required">*</span></label>
+                        <input type="text" id="industryOccupation" name="industry_occupation" placeholder="例: IT業界" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jobType">職種<span class="required">*</span></label>
+                        <input type="text" id="jobType" name="job_type" placeholder="例: エンジニア" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商談情報セクション -->
+            <div class="form-section">
+                <div class="section-title">📅 商談情報</div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label for="consultationDate">相談日</label>
+                        <input type="date" id="consultationDate" name="consultation_date">
+                        <div class="help-text">初回相談日(任意)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="meetingDate">商談日<span class="required">*</span></label>
+                        <input type="date" id="meetingDate" name="meeting_date" required>
+                        <div class="help-text">最終商談日</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dealOwner">営業担当者</label>
+                    <select id="dealOwner" name="deal_owner">
+                        <option value="">読み込み中...</option>
+                    </select>
+                    <div class="help-text">取引担当者を選択(任意)</div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                📝 商談を登録する
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>登録中...</p>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        const N8N_DATA_API_URL = 'https://kumamon-n8n.xvps.jp/webhook/get-meeting-form-data';
+        const N8N_WEBHOOK_URL = 'https://kumamon-n8n.xvps.jp/webhook/submit-meeting-report';
+
+        // ページ読み込み時に会社リストとユーザーリストを取得
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadFormData();
+            setupEventListeners();
+            setTodayDate();
+        });
+
+        // 今日の日付をデフォルトでセット
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('meetingDate').value = today;
+        }
+
+        // フォームデータを一括取得(n8n経由)
+        async function loadFormData() {
+            const companySelect = document.getElementById('companySelect');
+            const dealOwnerSelect = document.getElementById('dealOwner');
+            
+            try {
+                console.log('n8nからフォームデータを取得中...');
+                const response = await fetch(N8N_DATA_API_URL);
+
+                if (!response.ok) throw new Error('フォームデータの取得に失敗しました');
+
+                const data = await response.json();
+                console.log('取得データ:', data);
+
+                if (!data.success) throw new Error('データ取得APIがエラーを返しました');
+
+                // 会社リストを設定
+                companySelect.innerHTML = '<option value="">選択してください</option>';
+                data.companies.forEach(company => {
+                    const option = document.createElement('option');
+                    option.value = company.value;
+                    option.textContent = company.label;
+                    companySelect.appendChild(option);
+                });
+
+                // ユーザーリストを設定
+                dealOwnerSelect.innerHTML = '<option value="">選択してください</option>';
+                data.users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.value;
+                    option.textContent = user.label;
+                    option.dataset.name = user.label;
+                    dealOwnerSelect.appendChild(option);
+                });
+
+                // ★ Introduction(経路)の選択肢を設定
+                const introductionSelect = document.getElementById('introduction');
+                introductionSelect.innerHTML = '<option value="">選択してください</option>';
+                if (data.propertyOptions && data.propertyOptions.introduction) {
+                    data.propertyOptions.introduction.forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option.value;
+                        opt.textContent = option.label;
+                        introductionSelect.appendChild(opt);
+                    });
+                    console.log(`✅ 経路の選択肢: ${data.propertyOptions.introduction.length}件`);
+                }
+
+                console.log(`✅ 会社: ${data.companies.length}件, ユーザー: ${data.users.length}件`);
+
+            } catch (error) {
+                console.error('Error loading form data:', error);
+                companySelect.innerHTML = '<option value="_new_">🆕 新規会社</option>';
+                dealOwnerSelect.innerHTML = '<option value="">担当者の取得に失敗</option>';
+                showMessage('フォームデータの取得に失敗しました。新規会社のみ登録可能です。', 'error');
+            }
+        }
+
+        // イベントリスナーの設定
+        function setupEventListeners() {
+            // 会社選択の変更
+            document.getElementById('companySelect').addEventListener('change', (e) => {
+                const companyNameGroup = document.getElementById('companyNameGroup');
+                const companyNameInput = document.getElementById('companyName');
+                
+                if (e.target.value === '_new_') {
+                    companyNameGroup.classList.add('active');
+                    companyNameInput.required = true;
+                } else {
+                    companyNameGroup.classList.remove('active');
+                    companyNameInput.required = false;
+                    companyNameInput.value = '';
+                }
+            });
+
+            // フォーム送信
+            document.getElementById('meetingReportForm').addEventListener('submit', handleSubmit);
+        }
+
+        // フォーム送信処理
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const messageDiv = document.getElementById('message');
+
+            // ボタンを無効化
+            submitBtn.disabled = true;
+            loading.classList.add('active');
+            messageDiv.classList.remove('active');
+
+            try {
+                // フォームデータを取得
+                const formData = new FormData(e.target);
+                const data = {
+                    company_id: formData.get('company_id'),
+                    company_name: formData.get('company_id') === '_new_' ? formData.get('company_name') : '',
+                    state: formData.get('state'),
+                    introduction: formData.get('introduction'),
+                    industry_occupation: formData.get('industry_occupation'),
+                    job_type: formData.get('job_type'),
+                    consultation_date: formData.get('consultation_date'),
+                    meeting_date: formData.get('meeting_date'),
+                    deal_owner: formData.get('deal_owner') || '',
+                    deal_owner_name: getDealOwnerName()
+                };
+
+                console.log('送信データ:', data);
+
+                // n8nに送信
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('レスポンス:', result);
+
+                if (result.success) {
+                    const actionText = result.is_new_deal ? '新規取引が作成' : '既存取引が更新';
+                    showMessage(
+                        `✅ 商談報告が完了しました!(${actionText})<br>` +
+                        `会社: ${result.company_name}<br>` +
+                        `Deal ID: ${result.deal_id}<br>` +
+                        `<a href="${result.hubspot_deal_url}" target="_blank">HubSpotで確認 →</a>`,
+                        'success'
+                    );
+                    
+                    // フォームをリセット
+                    setTimeout(() => {
+                        e.target.reset();
+                        document.getElementById('companyNameGroup').classList.remove('active');
+                        setTodayDate();
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || '登録に失敗しました');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(`❌ エラーが発生しました: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                loading.classList.remove('active');
+            }
+        }
+
+        // 取引担当者名を取得
+        function getDealOwnerName() {
+            const select = document.getElementById('dealOwner');
+            const selectedOption = select.options[select.selectedIndex];
+            return selectedOption.dataset.name || '';
+        }
+
+        // メッセージ表示
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = text;
+            messageDiv.className = `message ${type} active`;
+        }
+    </script>
+</body>
+</html>
