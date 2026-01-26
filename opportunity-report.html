@@ -102,7 +102,6 @@
     let CONFIRMED_COMPANY_ID = null;
 
     $(document).ready(function() {
-        // 日付初期値
         const today = new Date().toISOString().split('T')[0];
         $('#reportDate').val(today);
         $('#meetingDate').val(today);
@@ -110,14 +109,12 @@
         const prefectures = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
         prefectures.forEach(p => $('#state').append(`<option value="${p}">${p}</option>`));
 
-        // マスタデータ(経路 & ユーザー)取得
+        // マスタデータ
         $.get(API_MASTER, function(data) {
-            // 経路
             const intro = data.properties.introduction || [];
             $('#introduction').empty().append('<option value="">選択してください</option>');
             intro.forEach(o => $('#introduction').append(`<option value="${o.value}">${o.label}</option>`));
 
-            // 担当者 (Users)
             const owners = data.properties.owners || [];
             $('#owner').empty().append('<option value="">選択してください</option>');
             owners.forEach(o => $('#owner').append(`<option value="${o.value}">${o.label}</option>`));
@@ -126,18 +123,19 @@
              $('#owner').html('<option value="">読込エラー</option>');
         });
 
-        // 検索
+        // ★★★ 検索機能の改修 ★★★
         $('#companySearch').select2({
-            placeholder: '会社名検索...',
+            placeholder: 'タップして会社を検索、または新規作成',
             allowClear: true,
-            minimumInputLength: 2,
+            minimumInputLength: 0, // ★ここを0にすることで、クリック即表示！
             ajax: {
                 url: API_SEARCH,
                 dataType: 'json',
                 delay: 300,
-                data: params => ({ q: params.term }),
+                data: params => ({ q: params.term || '' }), // 空のときは空文字を送る
                 processResults: data => {
                     const res = data.results || [];
+                    // 常に「新規登録」を先頭に追加
                     res.unshift({ id: '_new_', text: '➕ 新規会社として登録' });
                     return { results: res };
                 }
@@ -159,7 +157,7 @@
             $('#newNameGroup').addClass('hidden');
         });
 
-        // --- STEP 1: 会社登録 ---
+        // --- STEP 1 ---
         $('#btnStep1').click(function() {
             const companyId = $('#companySearch').val();
             const ownerId = $('#owner').val();
@@ -219,7 +217,7 @@
             });
         });
 
-        // --- STEP 2: 商談登録 ---
+        // --- STEP 2 ---
         $('#btnStep2').click(function() {
             if(!CONFIRMED_COMPANY_ID) return alert("会社ID消失エラー");
 
@@ -231,7 +229,6 @@
                 report_date: $('#reportDate').val(),
                 meeting_date: $('#meetingDate').val(),
                 meeting_notes: $('#notes').val(),
-                // ★追加: 通知用に画面の入力値を一緒に送る
                 state: $('#state').val(),
                 industry: $('#industry').val(),
                 job_type: $('#job_type').val(),
