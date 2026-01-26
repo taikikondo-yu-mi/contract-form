@@ -155,7 +155,7 @@
             $('#introduction').empty().append('<option value="">選択してください</option>');
             opts.forEach(o => $('#introduction').append(`<option value="${o.value}">${o.label}</option>`));
         }).fail(function() {
-             $('#introduction').html('<option value="">読み込みエラー (手動選択不可)</option>');
+             $('#introduction').html('<option value="">読み込みエラー</option>');
         });
 
         // 検索機能 (Select2)
@@ -170,31 +170,24 @@
                 data: params => ({ q: params.term }),
                 processResults: data => {
                     const res = data.results || [];
-                    // 先頭に新規登録オプションを追加
                     res.unshift({ id: '_new_', text: '➕ 新規会社として登録' });
                     return { results: res };
                 }
             }
         });
 
-        // ★選択時の挙動修正: 既存でも新規でも詳細フィールドを表示する
+        // 選択時の挙動
         $('#companySearch').on('select2:select', function(e) {
             const selectedId = e.params.data.id;
-            
-            // とりあえず詳細エリアを表示
             $('#companyDetailFields').removeClass('hidden');
-
             if(selectedId === '_new_') {
-                // 新規の場合: 正式名称入力を表示
                 $('#newNameGroup').removeClass('hidden');
                 $('#companyNameNew').focus();
             } else {
-                // 既存の場合: 正式名称入力は隠す (検索で選んだ名前を使うため)
                 $('#newNameGroup').addClass('hidden');
             }
         });
 
-        // クリア時は詳細も隠す
         $('#companySearch').on('select2:clear', function() {
             $('#companyDetailFields').addClass('hidden');
             $('#newNameGroup').addClass('hidden');
@@ -207,7 +200,7 @@
 
             // 表示用会社名の決定
             let displayCompanyName = "";
-            let apiPayloadName = ""; // APIに送る名前(新規のみ)
+            let apiPayloadName = ""; 
 
             if(companyId === '_new_') {
                 const manualName = $('#companyNameNew').val();
@@ -215,46 +208,49 @@
                 displayCompanyName = manualName;
                 apiPayloadName = manualName;
             } else {
-                // Select2の表示テキストを取得
                 const data = $('#companySearch').select2('data');
                 if(data && data[0]) {
-                    displayCompanyName = data[0].text.replace(/\s*\(.*\)$/, ''); // ドメイン除去
+                    displayCompanyName = data[0].text.replace(/\s*\(.*\)$/, ''); 
                 }
             }
 
-            // ペイロード作成
             const payload = {
                 company_id: companyId,
-                company_name_new: apiPayloadName, // 新規のときだけ値が入る
+                company_name_new: apiPayloadName,
                 state: $('#state').val(),
                 industry_occupation: $('#industry').val(),
                 job_type: $('#job_type').val(),
                 introduction: $('#introduction').val()
             };
 
-            // ボタン無効化
             $(this).prop('disabled', true);
             $('#loading1').removeClass('hidden');
 
-            // 会社登録APIへ送信
             $.ajax({
                 url: API_STEP1,
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(payload),
                 success: function(res) {
+                    // ★ID取得チェック（ここが重要）
+                    if (!res.company_id) {
+                        alert("システムエラー: 会社IDが取得できませんでした。\nもう一度試すか、管理者に連絡してください。");
+                        $('#btnStep1').prop('disabled', false);
+                        $('#loading1').addClass('hidden');
+                        return;
+                    }
+
                     // ID確保
                     CONFIRMED_COMPANY_ID = res.company_id;
                     
                     // 次のステップへ
                     $('#step1').addClass('hidden');
                     $('#step2').removeClass('hidden');
-                    // 画面上の名前を表示 (APIレスポンス待ちによるObject表示回避)
                     $('#confirmedCompanyName').text(displayCompanyName);
                 },
                 error: function(xhr) {
                     console.error(xhr);
-                    alert("会社情報の登録・更新に失敗しました。\n通信環境などを確認して再試行してください。");
+                    alert("通信エラーが発生しました。");
                     $('#btnStep1').prop('disabled', false);
                     $('#loading1').addClass('hidden');
                 }
