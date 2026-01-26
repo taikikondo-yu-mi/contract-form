@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商談報告</title>
+    <title>商談報告 (会社情報入力対応版)</title>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f4f6f8; padding: 20px; color: #33475b; }
         .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { text-align: center; font-size: 20px; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        
-        .section-label { font-size: 12px; font-weight: bold; color: #516f90; background: #eaf0f6; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 15px; }
+        h1 { text-align: center; font-size: 20px; margin-bottom: 20px; font-weight: bold; }
         
         .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd6e2; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        input:focus, select:focus, textarea:focus { border-color: #ff7a59; outline: none; box-shadow: 0 0 0 2px rgba(255,122,89,0.2); }
-        
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd6e2; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        input:focus, select:focus, textarea:focus { border-color: #ff7a59; outline: none; box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.15); }
+
         .hidden { display: none; }
         
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; font-size: 16px; transition: 0.2s; }
-        .btn-primary { background: #ff7a59; }
-        .btn-primary:hover { background: #ff5c35; }
-        .btn-success { background: #00bf63; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; margin-top: 10px; font-size: 16px; }
+        .btn-primary { background: #ff7a59; transition: 0.2s; }
+        .btn-primary:hover { background: #e66b4d; }
+        .btn-success { background: #00bf63; transition: 0.2s; }
         .btn-success:hover { background: #00a354; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
 
-        .confirmed-box { background: #dff0d8; border: 1px solid #d0e9c6; color: #3c763d; padding: 15px; border-radius: 4px; margin-bottom: 20px; text-align: center; font-weight: bold; }
+        .step-badge { display: inline-block; background: #eaf0f6; padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #516f90; margin-bottom: 15px; font-weight: bold; }
+        .confirmed-box { background: #dff0d8; border: 1px solid #d0e9c6; color: #3c763d; padding: 15px; border-radius: 4px; margin-bottom: 25px; text-align: center; font-weight: bold; }
         
-        /* Select2の調整 */
-        .select2-container .select2-selection--single { height: 42px !important; padding: 6px; }
-        .select2-container--default .select2-selection--single .select2-selection__arrow { top: 8px; }
+        /* Select2調整 */
+        .select2-container .select2-selection--single { height: 46px !important; border: 1px solid #cbd6e2 !important; }
+        .select2-selection__rendered { line-height: 46px !important; padding-left: 12px !important; }
+        .select2-selection__arrow { height: 44px !important; }
     </style>
 </head>
 <body>
@@ -38,14 +39,265 @@
     <h1>📝 新規商談報告</h1>
 
     <div id="step1">
-        <div class="section-label">STEP 1: 会社情報の確認・更新</div>
+        <div class="step-badge">STEP 1/2: 会社情報の確認・登録</div>
         
         <div class="form-group">
-            <label>会社名 (検索 または 新規登録)<span style="color:red">*</span></label>
+            <label>会社名を検索してください <span style="color:red">*</span></label>
             <select id="companySearch" style="width: 100%;"></select>
         </div>
 
-        <div class="form-group hidden" id="newNameArea">
-            <label>会社名 (新規登録用: 正式名称)<span style="color:red">*</span></label>
-            <input type="text" id="companyNameNew" placeholder="例: 株式会社〇〇">
+        <div id="companyDetailFields" class="hidden">
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            
+            <div class="form-group hidden" id="newNameGroup">
+                <label>会社名 (正式名称を入力) <span style="color:red">*</span></label>
+                <input type="text" id="companyNameNew" placeholder="例: 株式会社サンプル">
+            </div>
+
+            <div class="form-group">
+                <label>都道府県</label>
+                <select id="state">
+                    <option value="">選択してください</option>
+                    </select>
+            </div>
+
+            <div class="form-group">
+                <label>業種</label>
+                <input type="text" id="industry" placeholder="例: 製造業, IT通信...">
+            </div>
+
+            <div class="form-group">
+                <label>職種</label>
+                <input type="text" id="job_type" placeholder="例: 営業部長, 担当者...">
+            </div>
+
+            <div class="form-group">
+                <label>経路 (Introduction) <span style="color:red">*</span></label>
+                <select id="introduction">
+                    <option value="">読み込み中...</option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary" id="btnStep1">この会社情報で進む</button>
         </div>
+        
+        <div id="loading1" class="hidden" style="text-align:center; margin-top:15px; color:#666;">
+            Processing... 会社情報を登録/更新中
+        </div>
+    </div>
+
+    <div id="step2" class="hidden">
+        <div class="step-badge">STEP 2/2: 商談ログ入力</div>
+        
+        <div class="confirmed-box">
+            ✅ 会社確定: <span id="confirmedCompanyName" style="font-size:1.2em;"></span>
+        </div>
+
+        <div class="form-group">
+            <label>相談発生日 (Report Date) <span style="color:red">*</span></label>
+            <input type="date" id="reportDate">
+        </div>
+
+        <div class="form-group">
+            <label>商談/コール実施日 (Meeting Date) <span style="color:red">*</span></label>
+            <input type="date" id="meetingDate">
+        </div>
+        
+        <div class="form-group">
+            <label>活動タイプ</label>
+            <div style="display:flex; gap:20px; margin-top:5px;">
+                <label style="font-weight:normal; cursor:pointer; display:flex; align-items:center;">
+                    <input type="radio" name="engType" value="MEETING" checked style="width:auto; margin-right:5px;"> ミーティング
+                </label>
+                <label style="font-weight:normal; cursor:pointer; display:flex; align-items:center;">
+                    <input type="radio" name="engType" value="CALL" style="width:auto; margin-right:5px;"> コール (電話)
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>メモ / 議事録 <span style="color:red">*</span></label>
+            <textarea id="notes" rows="5" placeholder="商談の内容、ネクストアクションなどを記入してください"></textarea>
+        </div>
+
+        <button class="btn btn-success" id="btnStep2">報告を完了する</button>
+        <div id="loading2" class="hidden" style="text-align:center; margin-top:15px; color:#666;">
+            Sending... 商談データを登録中
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    // ▼ API設定
+    const API_MASTER = 'https://kumamon-n8n.xvps.jp/webhook/get-master-data';
+    const API_SEARCH = 'https://kumamon-n8n.xvps.jp/webhook/search-companies';
+    const API_STEP1  = 'https://kumamon-n8n.xvps.jp/webhook/submit-company'; 
+    const API_STEP2  = 'https://kumamon-n8n.xvps.jp/webhook/submit-deal';
+
+    let CONFIRMED_COMPANY_ID = null;
+
+    $(document).ready(function() {
+        // 日付初期値
+        const today = new Date().toISOString().split('T')[0];
+        $('#reportDate').val(today);
+        $('#meetingDate').val(today);
+
+        // 都道府県リスト生成
+        const prefectures = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
+        prefectures.forEach(p => $('#state').append(`<option value="${p}">${p}</option>`));
+
+        // マスタデータ(経路)取得
+        $.get(API_MASTER, function(data) {
+            const opts = data.properties.introduction || [];
+            $('#introduction').empty().append('<option value="">選択してください</option>');
+            opts.forEach(o => $('#introduction').append(`<option value="${o.value}">${o.label}</option>`));
+        }).fail(function() {
+             $('#introduction').html('<option value="">読み込みエラー (手動選択不可)</option>');
+        });
+
+        // 検索機能 (Select2)
+        $('#companySearch').select2({
+            placeholder: '会社名を入力して検索...',
+            allowClear: true,
+            minimumInputLength: 2,
+            ajax: {
+                url: API_SEARCH,
+                dataType: 'json',
+                delay: 300,
+                data: params => ({ q: params.term }),
+                processResults: data => {
+                    const res = data.results || [];
+                    // 先頭に新規登録オプションを追加
+                    res.unshift({ id: '_new_', text: '➕ 新規会社として登録' });
+                    return { results: res };
+                }
+            }
+        });
+
+        // ★選択時の挙動修正: 既存でも新規でも詳細フィールドを表示する
+        $('#companySearch').on('select2:select', function(e) {
+            const selectedId = e.params.data.id;
+            
+            // とりあえず詳細エリアを表示
+            $('#companyDetailFields').removeClass('hidden');
+
+            if(selectedId === '_new_') {
+                // 新規の場合: 正式名称入力を表示
+                $('#newNameGroup').removeClass('hidden');
+                $('#companyNameNew').focus();
+            } else {
+                // 既存の場合: 正式名称入力は隠す (検索で選んだ名前を使うため)
+                $('#newNameGroup').addClass('hidden');
+            }
+        });
+
+        // クリア時は詳細も隠す
+        $('#companySearch').on('select2:clear', function() {
+            $('#companyDetailFields').addClass('hidden');
+            $('#newNameGroup').addClass('hidden');
+        });
+
+        // --- STEP 1: 会社確定ボタン ---
+        $('#btnStep1').click(function() {
+            const companyId = $('#companySearch').val();
+            if(!companyId) return alert("会社を選択してください");
+
+            // 表示用会社名の決定
+            let displayCompanyName = "";
+            let apiPayloadName = ""; // APIに送る名前(新規のみ)
+
+            if(companyId === '_new_') {
+                const manualName = $('#companyNameNew').val();
+                if(!manualName) return alert("会社名(正式名称)を入力してください");
+                displayCompanyName = manualName;
+                apiPayloadName = manualName;
+            } else {
+                // Select2の表示テキストを取得
+                const data = $('#companySearch').select2('data');
+                if(data && data[0]) {
+                    displayCompanyName = data[0].text.replace(/\s*\(.*\)$/, ''); // ドメイン除去
+                }
+            }
+
+            // ペイロード作成
+            const payload = {
+                company_id: companyId,
+                company_name_new: apiPayloadName, // 新規のときだけ値が入る
+                state: $('#state').val(),
+                industry_occupation: $('#industry').val(),
+                job_type: $('#job_type').val(),
+                introduction: $('#introduction').val()
+            };
+
+            // ボタン無効化
+            $(this).prop('disabled', true);
+            $('#loading1').removeClass('hidden');
+
+            // 会社登録APIへ送信
+            $.ajax({
+                url: API_STEP1,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function(res) {
+                    // ID確保
+                    CONFIRMED_COMPANY_ID = res.company_id;
+                    
+                    // 次のステップへ
+                    $('#step1').addClass('hidden');
+                    $('#step2').removeClass('hidden');
+                    // 画面上の名前を表示 (APIレスポンス待ちによるObject表示回避)
+                    $('#confirmedCompanyName').text(displayCompanyName);
+                },
+                error: function(xhr) {
+                    console.error(xhr);
+                    alert("会社情報の登録・更新に失敗しました。\n通信環境などを確認して再試行してください。");
+                    $('#btnStep1').prop('disabled', false);
+                    $('#loading1').addClass('hidden');
+                }
+            });
+        });
+
+        // --- STEP 2: 商談登録ボタン ---
+        $('#btnStep2').click(function() {
+            if(!CONFIRMED_COMPANY_ID) return alert("エラー: 会社IDが失われました。ページをリロードしてやり直してください。");
+
+            const payload = {
+                company_id: CONFIRMED_COMPANY_ID,
+                company_name: $('#confirmedCompanyName').text(),
+                report_date: $('#reportDate').val(),
+                meeting_date: $('#meetingDate').val(),
+                engagement_type: $('input[name="engType"]:checked').val(),
+                meeting_notes: $('#notes').val()
+            };
+
+            if(!payload.report_date || !payload.meeting_date || !payload.meeting_notes) {
+                return alert("必須項目（日付、メモ）を入力してください");
+            }
+
+            $(this).prop('disabled', true);
+            $('#loading2').removeClass('hidden');
+
+            $.ajax({
+                url: API_STEP2,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function() {
+                    alert("✅ 商談報告が完了しました！");
+                    location.reload();
+                },
+                error: function() {
+                    alert("商談登録に失敗しました。");
+                    $('#btnStep2').prop('disabled', false);
+                    $('#loading2').addClass('hidden');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
