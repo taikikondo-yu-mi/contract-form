@@ -180,7 +180,6 @@
                 if(data && data[0]) displayCompanyName = data[0].text.replace(/\s*\(.*\)$/, ''); 
             }
 
-            // ★Step 1: ここで担当者IDを送ります
             const payload = {
                 company_id: companyId,
                 company_name_new: apiPayloadName,
@@ -227,10 +226,16 @@
             const payload = {
                 company_id: CONFIRMED_COMPANY_ID,
                 company_name: $('#confirmedCompanyName').text(),
-                // ★Step 2からは担当者を削除しました（会社側だけに紐付きます）
+                hubspot_owner_id: $('#owner').val(),
+                owner_name: $('#owner option:selected').text(),
                 report_date: $('#reportDate').val(),
                 meeting_date: $('#meetingDate').val(),
-                meeting_notes: $('#notes').val()
+                meeting_notes: $('#notes').val(),
+                // ★追加: 通知用に画面の入力値を一緒に送る
+                state: $('#state').val(),
+                industry: $('#industry').val(),
+                job_type: $('#job_type').val(),
+                introduction_label: $('#introduction option:selected').text()
             };
 
             if(!payload.report_date || !payload.meeting_date || !payload.meeting_notes) {
