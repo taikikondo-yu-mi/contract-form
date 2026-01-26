@@ -82,7 +82,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-    // ▼ API設定 (末尾を変えています)
+    // ▼ API設定
     const API_MASTER = 'https://kumamon-n8n.xvps.jp/webhook/get-master-data';
     const API_SEARCH = 'https://kumamon-n8n.xvps.jp/webhook/search-companies';
     const API_STEP1  = 'https://kumamon-n8n.xvps.jp/webhook/submit-company'; // 会社作成
@@ -133,6 +133,25 @@
             const companyId = $('#companySearch').val();
             if(!companyId) return alert("会社を選択してください");
 
+            // ★修正点: 表示用の会社名をここで確定させる
+            let displayCompanyName = "";
+            
+            // 新規作成の場合
+            if(companyId === '_new_') {
+                displayCompanyName = $('#companyNameNew').val();
+                if(!displayCompanyName) return alert("会社名を入力してください");
+            } 
+            // 既存選択の場合
+            else {
+                // Select2で選択されているテキストを取得
+                const data = $('#companySearch').select2('data');
+                if(data && data[0]) {
+                    displayCompanyName = data[0].text;
+                    // ドメイン表記 (toyota.co.jp) などを除去して綺麗にする
+                    displayCompanyName = displayCompanyName.replace(/\s*\(.*\)$/, '');
+                }
+            }
+
             const payload = {
                 company_id: companyId,
                 company_name_new: $('#companyNameNew').val(),
@@ -141,9 +160,6 @@
                 job_type: $('#job_type').val(),
                 introduction: $('#introduction').val()
             };
-
-            // 新規の場合のチェック
-            if(companyId === '_new_' && !payload.company_name_new) return alert("会社名を入力してください");
 
             // UI変更
             $(this).prop('disabled', true);
@@ -155,14 +171,16 @@
                 contentType: 'application/json',
                 data: JSON.stringify(payload),
                 success: function(res) {
-                    // ID確保！
+                    // ID確保
                     CONFIRMED_COMPANY_ID = res.company_id;
-                    const companyName = res.company_name;
-
+                    
+                    // ★修正点: APIの返却値を使わず、自分で確保した名前を表示する
+                    // （これで [object Object] になるのを防ぐ）
+                    
                     // 画面切り替え
                     $('#step1').addClass('hidden');
                     $('#step2').removeClass('hidden');
-                    $('#confirmedCompanyName').text(companyName);
+                    $('#confirmedCompanyName').text(displayCompanyName); // ＜ここを修正しました
                 },
                 error: function() {
                     alert("会社情報の登録に失敗しました");
@@ -177,8 +195,8 @@
             if(!CONFIRMED_COMPANY_ID) return alert("会社IDが不明です。最初からやり直してください");
 
             const payload = {
-                company_id: CONFIRMED_COMPANY_ID, // ★ここで確実なIDを送る
-                company_name: $('#confirmedCompanyName').text(),
+                company_id: CONFIRMED_COMPANY_ID,
+                company_name: $('#confirmedCompanyName').text(), // 表示されている正しい名前を送る
                 report_date: $('#reportDate').val(),
                 meeting_date: $('#meetingDate').val(),
                 engagement_type: $('input[name="engType"]:checked').val(),
