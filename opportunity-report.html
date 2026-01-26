@@ -32,3 +32,231 @@
 
     <div id="step1">
         <div class="step-badge">STEP 1/2: 担当者・会社情報</div>
+        
+        <div class="form-group">
+            <label>報告担当者 (Owner) <span style="color:red">*</span></label>
+            <select id="owner">
+                <option value="">読み込み中...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>会社名を検索 <span style="color:red">*</span></label>
+            <select id="companySearch" style="width: 100%;"></select>
+        </div>
+
+        <div id="companyDetailFields" class="hidden">
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            
+            <div class="form-group hidden" id="newNameGroup">
+                <label>会社名 (正式名称) <span style="color:red">*</span></label>
+                <input type="text" id="companyNameNew" placeholder="例: 株式会社サンプル">
+            </div>
+
+            <div class="form-group">
+                <label>都道府県</label>
+                <select id="state"><option value="">選択してください</option></select>
+            </div>
+            
+            <div class="form-group"><label>業種</label><input type="text" id="industry"></div>
+            <div class="form-group"><label>職種</label><input type="text" id="job_type"></div>
+            
+            <div class="form-group">
+                <label>経路 <span style="color:red">*</span></label>
+                <select id="introduction"><option value="">読み込み中...</option></select>
+            </div>
+
+            <button class="btn btn-primary" id="btnStep1">この内容で進む</button>
+        </div>
+        
+        <div id="loading1" class="hidden" style="text-align:center; margin-top:15px; color:#666;">Processing...</div>
+    </div>
+
+    <div id="step2" class="hidden">
+        <div class="step-badge">STEP 2/2: 商談ログ入力</div>
+        <div class="confirmed-box">✅ 会社確定: <span id="confirmedCompanyName"></span></div>
+
+        <div class="form-group"><label>相談発生日 <span style="color:red">*</span></label><input type="date" id="reportDate"></div>
+        <div class="form-group"><label>面談日 <span style="color:red">*</span></label><input type="date" id="meetingDate"></div>
+        
+        <div class="form-group">
+            <label>メモ / 議事録 <span style="color:red">*</span></label>
+            <textarea id="notes" rows="5" placeholder="商談の内容を記入してください"></textarea>
+        </div>
+
+        <button class="btn btn-success" id="btnStep2">報告を完了する</button>
+        <div id="loading2" class="hidden" style="text-align:center; margin-top:15px; color:#666;">Sending...</div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    // ▼ API設定
+    const API_MASTER = 'https://kumamon-n8n.xvps.jp/webhook/get-master-data';
+    const API_SEARCH = 'https://kumamon-n8n.xvps.jp/webhook/search-companies';
+    const API_STEP1  = 'https://kumamon-n8n.xvps.jp/webhook/submit-company'; 
+    const API_STEP2  = 'https://kumamon-n8n.xvps.jp/webhook/submit-deal';
+
+    let CONFIRMED_COMPANY_ID = null;
+
+    $(document).ready(function() {
+        // 日付初期値
+        const today = new Date().toISOString().split('T')[0];
+        $('#reportDate').val(today);
+        $('#meetingDate').val(today);
+
+        const prefectures = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
+        prefectures.forEach(p => $('#state').append(`<option value="${p}">${p}</option>`));
+
+        // マスタデータ(経路 & ユーザー)取得
+        $.get(API_MASTER, function(data) {
+            // 経路
+            const intro = data.properties.introduction || [];
+            $('#introduction').empty().append('<option value="">選択してください</option>');
+            intro.forEach(o => $('#introduction').append(`<option value="${o.value}">${o.label}</option>`));
+
+            // 担当者 (Users)
+            const owners = data.properties.owners || [];
+            $('#owner').empty().append('<option value="">選択してください</option>');
+            owners.forEach(o => $('#owner').append(`<option value="${o.value}">${o.label}</option>`));
+        }).fail(function() {
+             $('#introduction').html('<option value="">読込エラー</option>');
+             $('#owner').html('<option value="">読込エラー</option>');
+        });
+
+        // 検索
+        $('#companySearch').select2({
+            placeholder: '会社名検索...',
+            allowClear: true,
+            minimumInputLength: 2,
+            ajax: {
+                url: API_SEARCH,
+                dataType: 'json',
+                delay: 300,
+                data: params => ({ q: params.term }),
+                processResults: data => {
+                    const res = data.results || [];
+                    res.unshift({ id: '_new_', text: '➕ 新規会社として登録' });
+                    return { results: res };
+                }
+            }
+        });
+
+        // 選択時の表示制御
+        $('#companySearch').on('select2:select', function(e) {
+            $('#companyDetailFields').removeClass('hidden');
+            if(e.params.data.id === '_new_') {
+                $('#newNameGroup').removeClass('hidden');
+                $('#companyNameNew').focus();
+            } else {
+                $('#newNameGroup').addClass('hidden');
+            }
+        });
+        $('#companySearch').on('select2:clear', function() {
+            $('#companyDetailFields').addClass('hidden');
+            $('#newNameGroup').addClass('hidden');
+        });
+
+        // --- STEP 1: 会社登録 ---
+        $('#btnStep1').click(function() {
+            const companyId = $('#companySearch').val();
+            const ownerId = $('#owner').val();
+            
+            if(!companyId) return alert("会社を選択してください");
+            if(!ownerId) return alert("担当者を選択してください"); 
+
+            let displayCompanyName = "";
+            let apiPayloadName = ""; 
+
+            if(companyId === '_new_') {
+                const manualName = $('#companyNameNew').val();
+                if(!manualName) return alert("会社名(正式名称)を入力してください");
+                displayCompanyName = manualName;
+                apiPayloadName = manualName;
+            } else {
+                const data = $('#companySearch').select2('data');
+                if(data && data[0]) displayCompanyName = data[0].text.replace(/\s*\(.*\)$/, ''); 
+            }
+
+            // ★Step 1: ここで担当者IDを送ります
+            const payload = {
+                company_id: companyId,
+                company_name_new: apiPayloadName,
+                hubspot_owner_id: ownerId, 
+                state: $('#state').val(),
+                industry_occupation: $('#industry').val(),
+                job_type: $('#job_type').val(),
+                introduction: $('#introduction').val()
+            };
+
+            $(this).prop('disabled', true);
+            $('#loading1').removeClass('hidden');
+
+            $.ajax({
+                url: API_STEP1,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function(res) {
+                    if (!res.company_id) {
+                        alert("システムエラー: 会社ID取得失敗");
+                        $('#btnStep1').prop('disabled', false);
+                        $('#loading1').addClass('hidden');
+                        return;
+                    }
+                    CONFIRMED_COMPANY_ID = res.company_id;
+                    
+                    $('#step1').addClass('hidden');
+                    $('#step2').removeClass('hidden');
+                    $('#confirmedCompanyName').text(displayCompanyName);
+                },
+                error: function() {
+                    alert("通信エラーが発生しました");
+                    $('#btnStep1').prop('disabled', false);
+                    $('#loading1').addClass('hidden');
+                }
+            });
+        });
+
+        // --- STEP 2: 商談登録 ---
+        $('#btnStep2').click(function() {
+            if(!CONFIRMED_COMPANY_ID) return alert("会社ID消失エラー");
+
+            const payload = {
+                company_id: CONFIRMED_COMPANY_ID,
+                company_name: $('#confirmedCompanyName').text(),
+                // ★Step 2からは担当者を削除しました（会社側だけに紐付きます）
+                report_date: $('#reportDate').val(),
+                meeting_date: $('#meetingDate').val(),
+                meeting_notes: $('#notes').val()
+            };
+
+            if(!payload.report_date || !payload.meeting_date || !payload.meeting_notes) {
+                return alert("必須項目を入力してください");
+            }
+
+            $(this).prop('disabled', true);
+            $('#loading2').removeClass('hidden');
+
+            $.ajax({
+                url: API_STEP2,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function() {
+                    alert("✅ 商談報告が完了しました！");
+                    location.reload();
+                },
+                error: function() {
+                    alert("送信に失敗しました");
+                    $('#btnStep2').prop('disabled', false);
+                    $('#loading2').addClass('hidden');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
