@@ -190,10 +190,10 @@
                 company_id: companyId,
                 company_name_new: apiPayloadName,
                 hubspot_owner_id: ownerId, 
-                state: $('#state').val(),
-                industry_occupation: $('#industry').val(),
-                job_type: $('#job_type').val(),
-                introduction: $('#introduction').val()
+                state: state,
+                industry_occupation: industry,
+                job_type: jobType,
+                introduction: intro
             };
 
             $(this).prop('disabled', true);
